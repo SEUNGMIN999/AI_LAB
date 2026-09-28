@@ -1,0 +1,1829 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 탐험 연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Fredoka:wght@600&family=Noto+Sans+KR:wght@500;700;800&display=swap">
+<style>
+:root{
+  --bg:#F3EBDD; --surface:#FFFBF3; --surface2:#F9F1E4; --wood:#B97D40; --wood-soft:#E8D2B2;
+  --ink:#24304A; --muted:#6C6873; --line:#E0CDB2;
+  --ai:#2A66DA; --ai-soft:#DCE7FF; --glow:#8DBEFF;
+  --me:#1F935A; --me-soft:#D6F0E1; --warn:#D2453A; --warn-soft:#FADFDA; --gold:#E3A21A;
+  --shadow:0 6px 0 rgba(120,80,30,.14);
+  --disp:"Fredoka","Do Hyeon","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#141C2A; --surface:#1D283A; --surface2:#233046; --wood:#D9A367; --wood-soft:#3A3226;
+    --ink:#EDF0F6; --muted:#A4ADBC; --line:#34425A;
+    --ai:#72A6FF; --ai-soft:#223A63; --glow:#5E94F0;
+    --me:#52CB8C; --me-soft:#1C3E2D; --warn:#FF7D6E; --warn-soft:#4A2724; --gold:#F2BA43;
+    --shadow:0 6px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#141C2A; --surface:#1D283A; --surface2:#233046; --wood:#D9A367; --wood-soft:#3A3226;
+  --ink:#EDF0F6; --muted:#A4ADBC; --line:#34425A;
+  --ai:#72A6FF; --ai-soft:#223A63; --glow:#5E94F0;
+  --me:#52CB8C; --me-soft:#1C3E2D; --warn:#FF7D6E; --warn-soft:#4A2724; --gold:#F2BA43;
+  --shadow:0 6px 0 rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding:0 16px 48px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3,.disp{font-family:var(--disp);font-weight:400;text-wrap:balance;line-height:1.25;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px;border-bottom:2px solid var(--line);margin-bottom:22px}
+.top .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0}
+.brand .mini-orb{width:34px;height:34px}
+.brand span{font-family:var(--disp);font-size:22px}
+.rail{display:flex;gap:6px;margin-left:auto;align-items:center}
+.rail .b{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:2px dashed var(--line);color:var(--muted);font-family:var(--disp);font-size:14px;background:var(--surface)}
+.rail .b.on{border:2px solid var(--gold);background:var(--gold);color:#fff}
+.tbtn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:15px}
+
+/* orb */
+.orb{position:relative;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 6%,#BFDBFF 14%,#5B98F5 42%,#2455C8 72%,#17338A 100%);box-shadow:0 0 30px 8px color-mix(in srgb,var(--glow) 60%,transparent),inset 0 -8px 20px rgba(0,0,40,.35)}
+.orb::after{content:"AI";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-family:var(--disp);font-size:38%;text-shadow:0 2px 8px rgba(0,30,120,.6)}
+.mini-orb{box-shadow:0 0 10px 2px color-mix(in srgb,var(--glow) 60%,transparent)}
+.mini-orb::after{font-size:13px}
+@media (prefers-reduced-motion:no-preference){ .orb.big{animation:pulse 3.2s ease-in-out infinite} }
+@keyframes pulse{50%{box-shadow:0 0 46px 14px color-mix(in srgb,var(--glow) 70%,transparent),inset 0 -8px 20px rgba(0,0,40,.35)}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--surface);border:3px solid var(--wood-soft);border-radius:26px;padding:26px 28px;box-shadow:var(--shadow)}
+.hero .orb{width:150px;height:150px}
+.sign{display:inline-block;background:var(--ai);color:#fff;font-family:var(--disp);font-size:15px;padding:4px 14px;border-radius:10px;border:3px solid var(--wood);letter-spacing:.04em;margin-bottom:10px}
+.hero h1{font-size:clamp(30px,calc(var(--vw1,1vw)*5),44px)}
+.hero p{color:var(--muted);margin-top:8px;max-width:34em}
+.namebox{display:flex;gap:8px;margin-top:16px;max-width:420px}
+.namebox input{flex:1}
+
+/* rooms */
+.sect-h{display:flex;justify-content:space-between;align-items:baseline;margin:30px 0 12px;gap:10px;flex-wrap:wrap}
+.sect-h h2{font-size:24px}
+.sect-h small{color:var(--muted)}
+.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.room{text-align:left;background:var(--surface);border:3px solid var(--line);border-radius:20px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);transition:transform .15s}
+.room:hover{transform:translateY(-3px);border-color:var(--wood)}
+.room .row{display:flex;justify-content:space-between;align-items:center}
+.room .key{font-family:var(--disp);background:var(--wood-soft);color:var(--ink);border-radius:8px;padding:2px 10px;font-size:15px}
+.room .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--ai-soft);color:var(--ai)}
+.room h3{font-size:21px;margin-top:4px}
+.room p{font-size:15px;color:var(--muted)}
+.room .st{font-size:14px;margin-top:auto;padding-top:6px;color:var(--muted)}
+.room.done{border-color:var(--gold)}
+.room.done .st{color:var(--gold);font-weight:700}
+.group-lab{font-family:var(--disp);color:var(--wood);font-size:16px;grid-column:1/-1;margin-top:4px}
+
+/* stage */
+.stage-h{display:flex;gap:14px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.stage-h .ic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--ai-soft);color:var(--ai)}
+.stage-h small{display:block;color:var(--wood);font-family:var(--disp);font-size:16px;letter-spacing:.03em}
+.stage-h h2{font-size:30px}
+.mission{background:var(--surface);border:3px solid var(--wood-soft);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow);display:grid;gap:14px}
+.mission + .mission{margin-top:16px}
+.mission h3{font-size:20px}
+.lead{color:var(--muted)}
+.btn{border:0;border-radius:14px;padding:12px 20px;font-family:var(--disp);font-size:18px;background:var(--ai);color:#fff;box-shadow:0 4px 0 color-mix(in srgb,var(--ai) 60%,#000)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 color-mix(in srgb,var(--ai) 60%,#000)}
+.btn.alt{background:var(--surface2);color:var(--ink);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.btn.green{background:var(--me);box-shadow:0 4px 0 color-mix(in srgb,var(--me) 60%,#000)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.note{border-radius:14px;padding:12px 16px;background:var(--ai-soft);display:flex;gap:12px;align-items:flex-start}
+.note.good{background:var(--me-soft)} .note.bad{background:var(--warn-soft)}
+.note b{font-family:var(--disp);font-weight:400}
+.aithink{display:flex;gap:12px;align-items:center;background:var(--surface2);border:2px dashed var(--ai);border-radius:14px;padding:10px 14px}
+.aithink .orb{width:40px;height:40px;flex:none}
+.aithink .orb::after{font-size:14px}
+
+/* s1 */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.card{background:var(--surface2);border:2px solid var(--line);border-radius:16px;padding:10px;display:grid;gap:8px;justify-items:center}
+.card .em{font-size:44px;line-height:1.1}
+.card svg{width:84px;max-width:100%;height:auto}
+.card .meta{font-size:13px;color:var(--muted)}
+.seg{display:flex;gap:4px;width:100%}
+.seg button{flex:1;border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:4px 0;font-size:15px}
+.seg button.sel{background:var(--ai);border-color:var(--ai);color:#fff}
+.pred{font-family:var(--disp);font-size:17px;text-align:center}
+.pred.ok{color:var(--me)} .pred.no{color:var(--warn)} .pred.q{color:var(--muted)}
+
+/* s2 */
+.pets{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.pet{background:var(--surface2);border:2px solid var(--line);border-radius:12px;padding:6px;text-align:center;font-size:13px;color:var(--muted)}
+.pet svg{width:100%;height:auto;max-width:70px;display:block;margin:0 auto}
+.pet.new{border-color:var(--ai);border-style:dashed}
+
+/* s3 */
+.chat{display:grid;gap:10px}
+.q{justify-self:end;background:var(--wood-soft);border-radius:16px 16px 4px 16px;padding:8px 14px;max-width:85%}
+.a{display:flex;gap:10px;align-items:flex-start}
+.a .orb{width:36px;height:36px;flex:none}.a .orb::after{font-size:13px}
+.bubble{background:var(--surface2);border:2px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 12px;display:grid;gap:4px}
+.sent{text-align:left;border:0;background:transparent;border-radius:8px;padding:4px 6px}
+.sent:hover{background:var(--ai-soft)}
+.sent.hit{background:var(--warn-soft);text-decoration:line-through;text-decoration-color:var(--warn);text-decoration-thickness:2px}
+.sent.fine{background:var(--me-soft)}
+.risk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.risk div{background:var(--surface2);border-radius:14px;padding:12px;border:2px solid var(--line)}
+.risk b{font-family:var(--disp);font-weight:400;font-size:17px;display:block}
+.risk span{font-size:14px;color:var(--muted)}
+
+/* s4 */
+.claim{border:2px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px;background:var(--surface2)}
+.claim .said{display:flex;gap:10px;align-items:center}
+.claim .said .orb{width:30px;height:30px;flex:none}.claim .said .orb::after{font-size:11px}
+.claim .said p{font-size:18px}
+.judge{display:flex;gap:8px;flex-wrap:wrap}
+.judge button{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 14px}
+.judge button.sel.j0{background:var(--me);border-color:var(--me);color:#fff}
+.judge button.sel.j1{background:var(--gold);border-color:var(--gold);color:#fff}
+.judge button.sel.j2{background:var(--warn);border-color:var(--warn);color:#fff}
+
+/* s5 */
+.sit{display:grid;gap:14px;justify-items:center;text-align:center;padding:10px 0}
+.sit .tag{display:flex;align-items:center;gap:8px;font-family:var(--disp);color:var(--ai);background:var(--ai-soft);padding:6px 14px;border-radius:999px}
+.sit p.big{font-size:21px;max-width:28em}
+.ox{display:flex;gap:16px}
+.ox button{width:110px;height:110px;border-radius:24px;border:3px solid var(--line);background:var(--surface);font-family:var(--disp);font-size:54px}
+.ox .o{color:var(--me)} .ox .x{color:var(--warn)}
+.ox button:hover{border-color:currentColor}
+.prog{height:12px;background:var(--surface2);border-radius:99px;overflow:hidden;border:2px solid var(--line);width:100%}
+.prog i{display:block;height:100%;background:var(--ai);border-radius:99px;transition:width .3s}
+
+/* s6 */
+.line{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.line .n{font-family:var(--disp);color:var(--muted);width:22px;text-align:center}
+.who{display:flex;border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.who button{border:0;background:var(--surface);padding:8px 10px;font-size:14px;white-space:nowrap}
+.who button.me.sel{background:var(--me);color:#fff}
+.who button.ai.sel{background:var(--ai);color:#fff}
+.x-del{border:0;background:none;color:var(--muted);font-size:20px;padding:0 6px}
+.preview{background:var(--surface2);border-radius:16px;padding:16px;border:2px solid var(--line)}
+.preview h3{margin-bottom:6px}
+.hl-me{background:var(--me-soft);border-bottom:3px solid var(--me);padding:0 2px}
+.hl-ai{background:var(--ai-soft);border-bottom:3px solid var(--ai);padding:0 2px}
+.legend{display:flex;gap:14px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.credit{font-size:15px;border-top:2px dashed var(--line);margin-top:12px;padding-top:10px}
+.checks{display:grid;gap:8px}
+.checks label{display:flex;gap:10px;align-items:center;background:var(--surface2);border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+.checks input{width:22px;height:22px;accent-color:var(--me);flex:none}
+
+/* finish */
+.cert{background:var(--surface);border:6px double var(--wood);border-radius:24px;padding:28px;text-align:center;display:grid;gap:14px;justify-items:center;box-shadow:var(--shadow)}
+.cert h2{font-size:34px}
+.cert .who-name{font-family:var(--disp);font-size:30px;color:var(--ai)}
+.medals{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.medal{width:74px;display:grid;justify-items:center;gap:4px;font-size:13px;color:var(--muted)}
+.medal i{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);border:3px dashed var(--line);color:var(--muted)}
+.medal.on i{background:var(--gold);border:3px solid color-mix(in srgb,var(--gold) 70%,#000);color:#fff}
+.pledge{font-size:19px;max-width:30em}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border-bottom:2px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-family:var(--disp);font-weight:400;color:var(--wood)}
+.pill{display:inline-block;border-radius:99px;padding:1px 10px;font-size:13px}
+.pill.y{background:var(--me-soft);color:var(--me)} .pill.n{background:var(--surface2);color:var(--muted)}
+.foot-nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+
+/* fun layer */
+.xp{display:flex;align-items:center;gap:6px;font-family:var(--disp);background:var(--surface);border:2px solid var(--gold);border-radius:999px;padding:3px 12px 3px 4px;font-size:15px}
+.xp i{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#fff;display:grid;place-items:center;font-style:normal}
+.xp i svg{width:15px;height:15px}
+.coby{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.coby .orb{width:64px;height:64px;flex:none}
+.coby .orb::after{font-size:22px}
+.coby .say{position:relative;background:var(--surface);border:3px solid var(--ai);border-radius:18px;padding:10px 16px;font-size:18px;min-height:52px;flex:1}
+.coby .say::before{content:"";position:absolute;left:-12px;top:50%;margin-top:-9px;border:9px solid transparent;border-right-color:var(--ai);border-left:0}
+.coby .say b.nm{font-family:var(--disp);font-weight:400;color:var(--ai);margin-right:6px}
+@media (prefers-reduced-motion:no-preference){
+  .orb.happy{animation:hop .5s ease 2}
+  .orb.confused{animation:wob .45s ease 2}
+  .orb.think{animation:spin 1s linear infinite}
+  .toast{animation:rise 1.6s ease forwards}
+  .modal .bigmedal{animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
+  .combo{animation:pop .4s cubic-bezier(.2,1.6,.4,1) both}
+}
+@keyframes hop{40%{transform:translateY(-14px) scale(1.05)}}
+@keyframes wob{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,10px)}15%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-30px)}}
+@keyframes pop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--gold);color:#fff;font-family:var(--disp);font-size:22px;padding:8px 22px;border-radius:999px;z-index:40;pointer-events:none;box-shadow:0 4px 0 color-mix(in srgb,var(--gold) 60%,#000)}
+.overlay{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(3px);display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border:4px solid var(--gold);border-radius:26px;padding:28px 24px;text-align:center;display:grid;gap:12px;justify-items:center;max-width:380px;width:100%;box-shadow:var(--shadow)}
+.modal .bigmedal{width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,var(--gold) 55%,#B77A06);display:grid;place-items:center;color:#fff;border:5px solid #fff;box-shadow:0 0 0 4px var(--gold),0 0 40px color-mix(in srgb,var(--gold) 70%,transparent)}
+.modal .bigmedal svg{width:56px;height:56px}
+.modal h3{font-size:28px}
+.train-box{background:var(--surface);border:3px solid var(--ai);border-radius:24px;padding:26px;display:grid;gap:14px;justify-items:center;width:min(360px,100%);text-align:center}
+.train-box .orb{width:90px;height:90px}
+.train-box .orb::after{font-size:30px}
+.train-box .prog i{width:0;transition:width 1.3s linear}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+.combo{display:inline-block;font-family:var(--disp);color:#fff;background:var(--warn);padding:2px 14px;border-radius:999px;font-size:18px}
+.lvl{display:grid;gap:6px;margin-top:14px;max-width:420px}
+.lvl .row{display:flex;justify-content:space-between;font-size:15px;color:var(--muted)}
+.lvl .row b{font-family:var(--disp);font-weight:400;color:var(--ink);font-size:18px}
+.lvl .prog i{background:var(--gold)}
+.snd{min-width:0}
+@media (max-width:760px){
+  .rooms{grid-template-columns:repeat(2,1fr)}
+  .risk{grid-template-columns:repeat(2,1fr)}
+  .hero{grid-template-columns:1fr}
+  .hero .orb{width:96px;height:96px;grid-row:1}
+}
+@media (max-width:480px){
+  body{font-size:16px}
+  .coby .orb{width:48px;height:48px}.coby .say{font-size:16px}
+  .xp{font-size:13px}
+  .rooms{grid-template-columns:1fr}
+  .rail .b{width:24px;height:24px;font-size:12px}
+  .brand span{font-size:19px}
+  .ox button{width:90px;height:90px}
+  .line{grid-template-columns:1fr auto}
+  .line .n{display:none}
+  .line .who{grid-column:1/-1;justify-self:start}
+}
+
+/* ============ CLAY CLASSROOM SKIN ============ */
+:root{--hand:"Fredoka","Do Hyeon",sans-serif;--chalk:#2F5446;--chalk-ink:#F3F1E6;--rc:#2F6FE0;
+  --wall:#F6E7CF;--wall2:#EFD9B8;--floor:#D7A86E;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--wall:#1B2536;--wall2:#141C2A;--floor:#4A3A28;--chalk:#223F35}}
+:root[data-theme="dark"]{--wall:#1B2536;--wall2:#141C2A;--floor:#4A3A28;--chalk:#223F35}
+[data-room="1"]{--rc:#2F6FE0}[data-room="2"]{--rc:#E0931A}[data-room="3"]{--rc:#E0533F}
+[data-room="4"]{--rc:#7B5BD6}[data-room="5"]{--rc:#179A9A}[data-room="6"]{--rc:#2E9B57}
+body{background:
+  radial-gradient(ellipse 60% 45% at 8% 0%,rgba(255,236,190,.75),transparent 70%),
+  radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--wood) 16%,transparent) 1.2px,transparent 1.6px) 0 0/22px 22px,
+  linear-gradient(var(--wall),var(--wall2) 70%);
+  background-attachment:fixed;}
+/* wooden top bar */
+.top{background:linear-gradient(#C98B4E,#A96F36);border-bottom:0;box-shadow:0 5px 0 #7E4F22,0 10px 18px rgba(80,45,10,.25);margin:0 -16px 26px;padding-inline:16px;
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 2px,transparent 2px 38px),linear-gradient(#C98B4E,#A96F36)}
+.brand span{color:#FFF7EA;text-shadow:0 2px 0 #7E4F22}
+.rail .b{background:#FFF3E0;border:2px dashed #E7C79C;color:#A0703F}
+.rail .b.on{background:radial-gradient(circle at 35% 30%,#FFE9A8,#E3A21A 60%);border:2px solid #FFF3D0;box-shadow:0 2px 0 #9A6A10}
+.tbtn{background:#FFF3E0;border:2px solid #E7C79C;color:#5B3A1A;box-shadow:0 3px 0 #7E4F22}
+.top .xp{background:#FFF3E0;border-color:#FFD266;color:#5B3A1A}
+/* orb with neural network */
+.orb{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg stroke='%23fff' stroke-opacity='.4' stroke-width='1.1' fill='none'%3E%3Cpath d='M20 38 38 22 58 30 76 22M20 38 34 56 58 30 70 52 84 44M34 56 30 76 52 70 70 52 66 80M52 70 58 30M38 22 34 56'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='20' cy='38' r='2.4'/%3E%3Ccircle cx='38' cy='22' r='2.4'/%3E%3Ccircle cx='58' cy='30' r='2.8'/%3E%3Ccircle cx='76' cy='22' r='2'/%3E%3Ccircle cx='34' cy='56' r='2.6'/%3E%3Ccircle cx='70' cy='52' r='2.6'/%3E%3Ccircle cx='84' cy='44' r='2'/%3E%3Ccircle cx='30' cy='76' r='2'/%3E%3Ccircle cx='52' cy='70' r='2.4'/%3E%3Ccircle cx='66' cy='80' r='2'/%3E%3C/g%3E%3C/svg%3E") center/78% no-repeat,radial-gradient(circle at 35% 28%,#fff 0 5%,#CFE3FF 12%,#6FA6FA 38%,#2E5FD6 68%,#1A3A97 100%)}
+/* clay buttons */
+.btn{background:linear-gradient(color-mix(in srgb,var(--rc) 78%,#fff),var(--rc));box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 5px 0 color-mix(in srgb,var(--rc) 55%,#000);border-radius:16px;text-shadow:0 1px 0 rgba(0,0,0,.2)}
+.btn:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 2px 0 color-mix(in srgb,var(--rc) 55%,#000)}
+.btn.green{--rc:#2E9B57}
+.btn.alt{background:linear-gradient(var(--surface),var(--surface2));color:var(--ink);text-shadow:none;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 var(--line)}
+
+/* ---- HERO SCENE ---- */
+.scene{position:relative;border-radius:30px;overflow:hidden;background:linear-gradient(color-mix(in srgb,var(--wall) 60%,#fff) 0 64%,var(--floor) 64%);
+  box-shadow:0 8px 0 #8C5A2B,0 18px 34px rgba(90,50,10,.22);border:4px solid #B57A40}
+.scene::before{content:"";position:absolute;left:0;right:0;top:64%;bottom:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 3px,transparent 3px 90px),linear-gradient(rgba(255,255,255,.18),transparent)}
+.scene::after{content:"";position:absolute;left:-10%;top:-20%;width:55%;height:120%;background:linear-gradient(115deg,rgba(255,244,210,.55),transparent 60%);transform:skewX(-12deg);pointer-events:none}
+.scene-in{position:relative;z-index:1;padding:20px 26px 26px;display:grid;gap:18px}
+.sign-hang{justify-self:center;position:relative;padding-top:24px}
+.sign-hang .rope{position:absolute;top:-10px;width:5px;height:38px;background:#8C5A2B;border-radius:3px}
+.sign-hang .rope.l{left:22%}.sign-hang .rope.r{right:22%}
+.sign-board{background:linear-gradient(#3C7BEA,#2458C8);border:7px solid #D9A05E;outline:3px solid #9A6430;border-radius:22px;padding:8px 34px 12px;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.35),0 7px 0 #7E4F22,0 14px 22px rgba(0,0,0,.2)}
+.sign-board h1{color:#fff;font-size:clamp(34px,calc(var(--vw1,1vw)*6.4),64px);letter-spacing:.02em;text-shadow:0 4px 0 #173E97,0 6px 12px rgba(0,0,0,.25)}
+.scene-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:22px;align-items:end}
+.chalkboard{background:var(--chalk);border:9px solid #B98247;border-radius:14px;padding:16px 20px;box-shadow:inset 0 0 30px rgba(0,0,0,.35),0 6px 0 #7E4F22;position:relative;min-height:200px}
+.chalkboard::after{content:"";position:absolute;left:18%;right:18%;bottom:-14px;height:8px;background:#9A6430;border-radius:4px}
+.chalk-t{font-family:var(--hand);color:var(--chalk-ink);font-size:clamp(22px,calc(var(--vw1,1vw)*2.8),30px);line-height:1.3;opacity:.95}
+.chalk-t em{font-style:normal;color:#FFE07A}
+.chalk-list{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.chalk-list span{font-family:var(--hand);color:#BFE4FF;font-size:20px;border:2px dashed rgba(255,255,255,.35);border-radius:10px;padding:0 10px}
+.orb-stage{position:relative;height:290px}
+.orb-stage .orb{position:absolute;left:50%;top:44%;width:150px;height:150px;transform:translate(-50%,-50%)}
+.pedestal{position:absolute;left:50%;bottom:30px;width:190px;height:44px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 35%,#F3F6FB,#B9C3D3 70%);box-shadow:0 8px 0 #8E99AB,0 0 30px 6px color-mix(in srgb,var(--glow) 50%,transparent)}
+.tile{position:absolute;font-family:var(--disp);font-size:16px;background:linear-gradient(#FFFDF8,#EDE3D2);color:#3A2A18;padding:6px 12px;border-radius:12px;box-shadow:inset 0 2px 0 #fff,0 5px 0 #B9A07C,0 8px 12px rgba(0,0,0,.12);white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tile i{width:10px;height:10px;border-radius:3px;background:var(--c);display:block}
+@media (prefers-reduced-motion:no-preference){.tile{animation:float 4s ease-in-out infinite}.tile:nth-child(2n){animation-delay:-1.3s}.tile:nth-child(3n){animation-delay:-2.4s}}
+@keyframes float{50%{transform:translateY(-8px)}}
+.desk{position:relative;z-index:1;display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:center;background:linear-gradient(#E7BE88,#D7A86E);border-top:6px solid #C0894D;padding:18px 26px 22px;color:#3A2410}
+.desk p{color:#4A301A;font-size:16px}
+.note-paper{background:#FFFDF6;border-radius:6px 6px 16px 6px;padding:14px 16px;box-shadow:0 6px 12px rgba(80,45,10,.2);transform:rotate(-.8deg);display:grid;gap:10px;position:relative;color:#2E2A24}
+.note-paper::before{content:"";position:absolute;top:-10px;left:50%;width:70px;height:20px;margin-left:-35px;background:rgba(141,190,255,.6);transform:rotate(2deg)}
+.note-paper input{background:#fff;color:#2E2A24;border-color:#E6D6BC}
+.note-paper .lvl{margin:0}
+.note-paper .lvl .row{color:#6D655A}.note-paper .lvl .row b{color:#2E2A24}
+.namebox{margin:0}
+@media (max-width:760px){
+  .scene-grid,.desk{grid-template-columns:1fr}
+  .orb-stage{height:250px}
+  .chalkboard{min-height:0}
+}
+@media (max-width:480px){
+  .scene-in{padding:14px 14px 18px}.desk{padding:16px}
+  .tile{font-size:13px;padding:4px 8px}
+  .orb-stage .orb{width:120px;height:120px}
+  .pedestal{width:150px}
+}
+
+/* ---- ROOMS as doors ---- */
+.sect-h h2{font-size:28px}
+.group-lab{justify-self:start;background:linear-gradient(#E5B57A,#C98B4E);color:#FFF8EC;padding:4px 16px;border-radius:10px;box-shadow:0 4px 0 #8C5A2B;font-size:17px;text-shadow:0 1px 0 #7E4F22;margin-top:10px}
+.rooms{gap:22px 18px}
+.room{position:relative;padding:0;border:0;background:none;box-shadow:none;gap:0;overflow:visible}
+.room:hover{transform:translateY(-5px) rotate(-.5deg)}
+.room .door{position:relative;border-radius:90px 90px 14px 14px;background:linear-gradient(160deg,color-mix(in srgb,var(--rc) 70%,#fff),var(--rc) 70%);height:150px;display:grid;place-items:center;
+  box-shadow:inset 0 4px 0 rgba(255,255,255,.35),inset 0 -8px 0 rgba(0,0,0,.12),0 6px 0 color-mix(in srgb,var(--rc) 50%,#000);border:6px solid #FFF6E8;outline:3px solid #D7B07F}
+.room .door::after{content:"";position:absolute;right:18px;top:52%;width:12px;height:12px;border-radius:50%;background:#FFD266;box-shadow:0 2px 0 #9A6A10}
+.room .door .big-ic{width:78px;height:78px;border-radius:24px;background:rgba(255,255,255,.9);display:grid;place-items:center;color:var(--rc);box-shadow:0 5px 0 rgba(0,0,0,.14)}
+.room .door .big-ic svg{width:44px;height:44px}
+.room .num{position:absolute;left:14px;top:14px;width:34px;height:34px;border-radius:50%;background:#FFF6E8;color:var(--rc);font-family:var(--disp);display:grid;place-items:center;font-size:18px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.room .plate{margin:-14px 12px 0;position:relative;background:var(--surface);border-radius:16px;padding:14px 14px 12px;box-shadow:0 5px 0 var(--line),0 10px 18px rgba(80,45,10,.1);display:grid;gap:4px}
+.room .plate h3{font-size:21px;margin:0}
+.room .plate .key{justify-self:start;background:color-mix(in srgb,var(--rc) 16%,var(--surface));color:var(--rc);font-family:var(--disp);border-radius:8px;padding:0 10px;font-size:14px}
+.room .plate p{font-size:15px;color:var(--muted)}
+.room .sticker{position:absolute;right:-6px;top:-8px;z-index:2;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#E3A21A 60%,#B77A06);color:#fff;display:grid;place-items:center;transform:rotate(12deg);border:4px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.25);font-family:var(--disp);font-size:13px;line-height:1.1;text-align:center}
+.room:not(.done) .door{filter:saturate(.92)}
+
+/* ---- STAGE ---- */
+.stage-banner{position:relative;border-radius:26px;padding:18px 22px;margin-bottom:18px;overflow:hidden;
+  background:radial-gradient(circle at 90% 20%,rgba(255,255,255,.28),transparent 40%),linear-gradient(135deg,color-mix(in srgb,var(--rc) 75%,#fff),var(--rc));
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.35),0 7px 0 color-mix(in srgb,var(--rc) 50%,#000);color:#fff}
+.stage-banner::after{content:"";position:absolute;right:-30px;bottom:-40px;width:180px;height:180px;border-radius:50%;border:26px solid rgba(255,255,255,.12)}
+.stage-h{margin:0;position:relative;z-index:1}
+.stage-h .ic{background:rgba(255,255,255,.92);color:var(--rc);box-shadow:0 5px 0 rgba(0,0,0,.15);width:64px;height:64px;border-radius:20px}
+.stage-h .ic svg{width:36px;height:36px}
+.stage-h small{color:rgba(255,255,255,.88)}
+.stage-h h2{font-size:34px;text-shadow:0 3px 0 rgba(0,0,0,.18)}
+.stage-banner .coby{margin:14px 0 0;position:relative;z-index:1}
+.stage-banner .coby .say{border-color:#fff;color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.stage-banner .coby .say::before{border-right-color:#fff}
+.stage-banner .coby .say b.nm{color:var(--rc)}
+.coby .orb{box-shadow:0 0 0 5px rgba(255,255,255,.7),0 0 24px 6px color-mix(in srgb,var(--glow) 70%,transparent)}
+
+.mission{border:0;border-radius:22px;box-shadow:0 6px 0 var(--line),0 14px 24px rgba(80,45,10,.08);position:relative;padding:22px 20px 20px;background:var(--surface)}
+.mission > h3:first-child{justify-self:start;background:color-mix(in srgb,var(--rc) 14%,var(--surface));color:color-mix(in srgb,var(--rc) 80%,var(--ink));border:2px solid color-mix(in srgb,var(--rc) 35%,transparent);padding:4px 16px;border-radius:12px;font-size:19px}
+.mission.chalk{background:var(--chalk);border:10px solid #B98247;box-shadow:inset 0 0 40px rgba(0,0,0,.35),0 6px 0 #7E4F22}
+.mission.chalk > .lead,.mission.chalk .actions .lead,.mission.chalk .aithink p{color:#E4EEE8}
+.mission.chalk > h3:first-child{background:none;border:0;padding:0;font-family:var(--hand);font-size:30px;color:var(--chalk-ink)}
+.mission.chalk .aithink{background:rgba(255,255,255,.08);border-color:#BFE4FF;color:var(--chalk-ink)}
+.mission.chalk .card{transform:rotate(-1.2deg);box-shadow:0 6px 10px rgba(0,0,0,.25)}
+.mission.chalk .card:nth-child(2n){transform:rotate(1.4deg)}
+.mission.chalk .risk div{background:rgba(255,255,255,.1);border:2px dashed rgba(255,255,255,.35)}
+.mission.chalk .risk b{font-family:var(--hand);font-size:24px;color:#FFE07A}
+.mission.chalk .risk span{color:var(--chalk-ink)}
+.mission.chalk .note{color:var(--ink)}
+.card,.pet,.claim{border:0;box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 4px 0 var(--line);background:linear-gradient(var(--surface),var(--surface2))}
+.card .em{font-size:52px;filter:drop-shadow(0 4px 2px rgba(0,0,0,.18))}
+.seg button{border-radius:10px;box-shadow:0 3px 0 var(--line)}
+.seg button.sel{background:var(--rc);border-color:var(--rc);box-shadow:0 3px 0 color-mix(in srgb,var(--rc) 55%,#000)}
+.note{border-radius:16px;box-shadow:0 4px 0 color-mix(in srgb,var(--ai) 20%,transparent)}
+.note.good{box-shadow:0 4px 0 color-mix(in srgb,var(--me) 25%,transparent)}
+.note.bad{box-shadow:0 4px 0 color-mix(in srgb,var(--warn) 25%,transparent)}
+.bubble{box-shadow:0 4px 0 var(--line);border:0}
+.q{box-shadow:0 4px 0 color-mix(in srgb,var(--wood) 40%,transparent)}
+.ox button{box-shadow:inset 0 3px 0 rgba(255,255,255,.6),0 7px 0 var(--line);border:0;background:linear-gradient(var(--surface),var(--surface2));font-size:64px}
+.ox button.o:hover{box-shadow:inset 0 3px 0 rgba(255,255,255,.6),0 7px 0 var(--me)}
+.ox button.x:hover{box-shadow:inset 0 3px 0 rgba(255,255,255,.6),0 7px 0 var(--warn)}
+.sit .tag{background:color-mix(in srgb,var(--rc) 14%,var(--surface));color:var(--rc)}
+.sit p.big{font-size:23px}
+.prog i{background:var(--rc)}
+.judge button,.who{box-shadow:0 3px 0 var(--line)}
+.checks label{border:0;box-shadow:0 3px 0 var(--line)}
+.preview{background:#FFFDF6;color:#2E2A24;border:0;box-shadow:0 6px 12px rgba(80,45,10,.15);transform:rotate(-.4deg);border-radius:6px 6px 18px 6px;
+  background-image:repeating-linear-gradient(transparent 0 31px,#E7DCCB 31px 32px);line-height:32px}
+.preview .lead,.preview .legend{color:#6D655A}
+.cert{background:radial-gradient(circle at 50% 0%,#FFF5DA,var(--surface) 60%);border:10px solid #D9A05E;outline:4px solid #9A6430;border-radius:28px}
+.cert h2{font-size:40px;color:var(--ink)}
+.cert .who-name{font-size:38px}
+.medal.on i{background:radial-gradient(circle at 35% 30%,#FFE9A8,#E3A21A 60%,#B77A06);box-shadow:0 4px 0 #9A6A10}
+.foot-nav .btn{--rc:#B97D40}
+
+/* ---- step-by-step ---- */
+.stepper{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;align-items:center}
+.stepper span{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-size:15px;color:var(--muted);background:var(--surface);border-radius:999px;padding:3px 12px 3px 4px;box-shadow:0 3px 0 var(--line)}
+.stepper span i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);font-size:13px}
+.stepper span.c{color:#fff;background:var(--rc);box-shadow:0 3px 0 color-mix(in srgb,var(--rc) 55%,#000)}
+.stepper span.c i{background:rgba(255,255,255,.3)}
+.stepper span.d{color:var(--rc)}
+.stepper span.d i{background:color-mix(in srgb,var(--rc) 20%,var(--surface));color:var(--rc)}
+.substep{margin:-6px 0 12px;color:var(--muted);font-size:15px;display:flex;align-items:center;gap:10px}
+.prog.inline{display:inline-block;width:220px;max-width:calc(var(--vw1,1vw)*60);height:10px}
+@media (prefers-reduced-motion:no-preference){.step-in{animation:slidein .35s ease both}}
+@keyframes slidein{from{opacity:.001;transform:translateX(24px)}to{opacity:1;transform:none}}
+.solo{justify-self:center;display:grid;justify-items:center;gap:8px;background:linear-gradient(var(--surface),var(--surface2));border-radius:24px;padding:22px 36px;box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 6px 0 var(--line);min-width:220px;text-align:center}
+.solo .em{font-size:110px;line-height:1;filter:drop-shadow(0 6px 3px rgba(0,0,0,.18))}
+.solo svg{width:140px;height:auto}
+.solo .meta{color:var(--muted);font-size:15px}
+.solo .pred{font-size:30px}
+.mission.chalk .solo{transform:rotate(-1deg);box-shadow:0 8px 14px rgba(0,0,0,.3)}
+.mission.chalk .solo .meta{color:var(--muted)}
+.score{font-family:var(--disp);font-size:72px;line-height:1;color:var(--rc)}
+.score small{font-size:30px;color:var(--muted)}
+.choice{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.choice .btn{min-width:150px;font-size:22px;padding:16px 26px}
+.actions.center{justify-content:center}
+.btn.sm{font-size:15px;padding:8px 14px}
+.minis{display:flex;gap:10px;flex-wrap:wrap}
+.mini{display:grid;justify-items:center;background:var(--surface2);border-radius:14px;padding:8px 12px;box-shadow:0 3px 0 var(--line)}
+.mini span{font-size:36px;line-height:1.1}.mini b{font-family:var(--disp);font-weight:400;color:var(--rc)}
+.risk-one{justify-self:center;display:grid;gap:10px;text-align:center;padding:10px 0 4px;max-width:30em}
+.risk-one b{font-family:var(--hand);font-size:44px;color:#FFE07A;display:flex;gap:10px;align-items:center;justify-content:center;line-height:1.1}
+.risk-one b svg{width:36px;height:36px}
+.risk-one span{color:var(--chalk-ink);font-size:21px}
+.big-q{font-size:24px;font-family:var(--disp);text-align:center;padding:10px 0}
+.claim.big .said p{font-size:24px}
+.claim.big .said .orb{width:48px;height:48px}
+.judge.big{justify-content:center}
+.judge.big button{font-family:var(--disp);font-size:18px;padding:12px 18px;border-radius:14px}
+.judge.big .j0{border-color:var(--me);color:var(--me)}.judge.big .j1{border-color:var(--gold);color:color-mix(in srgb,var(--gold) 75%,var(--ink))}.judge.big .j2{border-color:var(--warn);color:var(--warn)}
+.verdict{font-size:17px}.verdict b{font-family:var(--disp);font-weight:400}.verdict .j0{color:var(--me)}.verdict .j1{color:var(--gold)}.verdict .j2{color:var(--warn)}
+.sentence{font-size:24px;text-align:center;font-family:var(--disp);padding:8px 0;text-wrap:balance}
+.two{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.sent:disabled{cursor:default;opacity:1}
+@media (max-width:480px){.solo{padding:16px 20px;min-width:0}.solo .em{font-size:84px}.choice .btn{min-width:0;flex:1}.two{grid-template-columns:1fr}.risk-one b{font-size:34px}}
+
+/* ---- readability ---- */
+body{font-size:19px;font-weight:500;line-height:1.65}
+b,strong{font-weight:800}
+.lead{font-size:18px;color:color-mix(in srgb,var(--ink) 72%,var(--surface))}
+.note{font-size:21px;line-height:1.7;padding:16px 20px;color:var(--ink)}
+.note b{font-family:var(--body);font-weight:800}
+.note.good b{color:var(--me)} .note.bad b{color:var(--warn)} .note:not(.good):not(.bad) b{color:var(--ai)}
+.mission > h3:first-child{font-size:22px;padding:5px 18px}
+.mission{gap:16px}
+.btn{font-size:20px;padding:13px 24px}
+.btn.sm{font-size:16px}
+.coby .say{font-size:20px}
+.aithink p{font-size:19px}
+.sent{font-size:19px;padding:6px 8px}
+.q{font-size:19px}
+.sit p.big{font-size:25px}
+.solo .meta{font-size:17px}
+.room .plate p{font-size:16px}
+.stepper span{font-size:16px}
+.substep{font-size:16px}
+input,textarea,select{font-size:19px}
+.preview{font-size:20px}
+.credit{font-size:17px}
+@media (max-width:480px){body{font-size:17px}.note{font-size:18px}.coby .say{font-size:17px}.sit p.big{font-size:21px}}
+.note > div,.lead{line-height:1.75}
+.note > div br{display:block;content:"";margin-top:4px}
+.ai-log{background:var(--surface2);border-radius:18px;padding:12px 14px;box-shadow:0 4px 0 var(--line)}
+.log-h{font-family:var(--disp);color:var(--ai);font-size:16px;margin-bottom:6px}
+.log-s{display:block;padding:2px 6px;border-radius:6px}
+.log-s.hl{background:#FFE58A;color:#2E2A24}
+.top,body,button,input,select,textarea{font-synthesis:none}
+body{font-weight:600;letter-spacing:.01em}
+b,strong,.note b{font-weight:600}
+h1,h2,h3,.disp,.btn{font-weight:600}
+input,textarea,select{font-family:var(--body);font-weight:600}
+.score{color:#fff;-webkit-text-stroke:3px color-mix(in srgb,var(--rc) 60%,#000);paint-order:stroke fill;text-shadow:0 4px 0 color-mix(in srgb,var(--rc) 50%,#000)}
+.xp{font-weight:600}
+
+/* ---- ID card ---- */
+.id-wrap{display:grid;grid-template-columns:minmax(0,360px) 1fr;gap:26px;align-items:start}
+.lanyard-col{display:grid;justify-items:center}
+.lanyard{width:46px;height:90px;background:repeating-linear-gradient(0deg,#2F6FE0 0 14px,#2A62C9 14px 16px);border-radius:0 0 6px 6px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.lanyard span{position:absolute;left:50%;top:0;writing-mode:vertical-rl;transform:translateX(-50%);color:#fff;font-size:10px;letter-spacing:.2em;opacity:.85;white-space:nowrap}
+.clip{width:34px;height:26px;margin-top:-4px;border-radius:6px 6px 10px 10px;background:linear-gradient(#E9EDF3,#9BA6B6);box-shadow:0 3px 0 #6E7A8C;position:relative;z-index:2}
+#mycard{margin-top:-10px;width:100%}
+.idcard{position:relative;width:100%;max-width:340px;margin:0 auto;background:#FFFFFF;color:#1F2433;border-radius:20px;overflow:hidden;
+  box-shadow:0 1px 0 #fff inset,0 10px 0 #C9CFDA,0 18px 30px rgba(20,30,60,.25);font-size:15px;line-height:1.35;letter-spacing:0}
+.idcard.temp{background:repeating-linear-gradient(135deg,#fff 0 14px,#FBFAF6 14px 28px)}
+.idc-hole{position:absolute;top:10px;left:50%;width:54px;height:10px;margin-left:-27px;border-radius:6px;background:#DDE2EA;box-shadow:inset 0 2px 3px rgba(0,0,0,.25);z-index:3}
+.idc-top{display:flex;align-items:center;gap:10px;padding:28px 16px 14px;background:linear-gradient(135deg,#3C7BEA,#2152BE);color:#fff;position:relative}
+.idc-top::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 6px,transparent 6px 12px)}
+.idc-top .mini-orb{width:38px;height:38px;flex:none;position:relative;z-index:1}
+.idc-top b{display:block;font-family:var(--disp);font-size:19px;font-weight:600;position:relative;z-index:1}
+.idc-top small{display:block;font-size:10px;letter-spacing:.18em;opacity:.8;position:relative;z-index:1;font-family:"Fredoka",sans-serif}
+.idc-type{margin-left:auto;background:#FFD266;color:#5B3A0A;font-family:var(--disp);font-size:13px;padding:3px 10px;border-radius:999px;position:relative;z-index:1}
+.idcard.temp .idc-type{background:#E7ECF3;color:#4A5568}
+.idc-body{padding:16px 18px 10px;display:grid;justify-items:center;gap:6px}
+.idc-photo{position:relative;width:150px;height:170px;border-radius:14px;overflow:hidden;background:linear-gradient(#DCEBFF,#B9D3F7);box-shadow:inset 0 0 0 4px #fff,0 0 0 2px #C9D6EA}
+.idc-photo svg{width:100%;height:100%;display:block}
+.holo{position:absolute;right:6px;bottom:6px;width:36px;height:36px;border-radius:50%;background:conic-gradient(from 0deg,#ffb3d9,#b3e5ff,#c9ffb3,#fff2b3,#e0b3ff,#ffb3d9);opacity:.75;mix-blend-mode:multiply;box-shadow:inset 0 0 0 2px rgba(255,255,255,.7)}
+.idc-name{font-family:var(--disp);font-size:28px;margin-top:6px;color:#1F2433}
+.idc-rank{font-size:13px;color:#2F6FE0;background:#E6EFFF;border-radius:999px;padding:2px 12px}
+.idc-info{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;width:100%;margin:8px 0 2px;padding:10px 0;border-top:1.5px dashed #D9DEE7;border-bottom:1.5px dashed #D9DEE7}
+.idc-info div{display:grid;gap:0}
+.idc-info dt{font-size:11px;color:#7A8395;letter-spacing:.04em}
+.idc-info dd{margin:0;font-size:15px;color:#1F2433;overflow-wrap:anywhere}
+.mono{font-family:"Fredoka","Do Hyeon",sans-serif;letter-spacing:.04em}
+.idc-badges{display:flex;gap:4px;justify-content:center;margin-top:4px}
+.idc-badges span{width:40px;display:grid;justify-items:center;gap:1px}
+.idc-badges span::before{content:"";display:none}
+.idc-badges span svg,.idc-badges span:not(.on)::after{width:28px;height:28px}
+.idc-badges span svg{padding:5px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A8,#E3A21A 60%,#B77A06);color:#fff;box-shadow:0 2px 0 #9A6A10;box-sizing:border-box}
+.idc-badges span:not(.on)::after{content:"";order:-1;border-radius:50%;border:2px dashed #CBD2DD;box-sizing:border-box;display:block}
+.idc-badges em{font-style:normal;font-size:9.5px;color:#7A8395;white-space:nowrap;letter-spacing:-.02em}
+.idc-pledge{font-size:14px;color:#3C4558;text-align:center;margin-top:4px;text-wrap:balance}
+.idc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 18px 16px}
+.bc{display:grid;gap:2px;width:150px}.bc svg{width:100%;height:30px;display:block}.bc span{font-size:10px;color:#4A5568;text-align:center}
+.stamp{width:62px;height:62px;border-radius:50%;border:3px solid #D2453A;color:#D2453A;display:grid;place-items:center;transform:rotate(-14deg);font-family:var(--disp);font-size:12px;line-height:1.1;text-align:center;opacity:.85;
+  box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px rgba(210,69,58,.6);mix-blend-mode:multiply}
+.stamp.off{border:2px dashed #CBD2DD;color:#9AA3B2;box-shadow:none;transform:none}
+.id-edit .fields{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center}
+.id-edit .fields label{font-size:17px;color:var(--muted)}
+.avpick{display:grid;gap:8px}
+.avpick .lab{font-family:var(--disp);color:var(--rc,#B97D40);font-size:18px}
+.avpick .row{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center}
+.avpick .row>span{color:var(--muted);font-size:16px}
+.avpick .row>div{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:15px;display:inline-flex;gap:6px;align-items:center;box-shadow:0 3px 0 var(--line)}
+.chip i{width:14px;height:14px;border-radius:50%;display:block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.chip.sel{border-color:#B97D40;background:#FFF1DC;color:#5B3A1A;box-shadow:0 3px 0 #B97D40}
+/* board */
+.corkboard{border-radius:24px;padding:18px;border:12px solid #B98247;box-shadow:inset 0 0 30px rgba(80,40,0,.35),0 6px 0 #7E4F22;
+  background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.12) 0 2px,transparent 3px) 0 0/18px 18px,radial-gradient(circle at 70% 60%,rgba(90,50,10,.15) 0 2px,transparent 3px) 0 0/23px 23px,#C89A63}
+.cork-h{display:flex;gap:14px;align-items:baseline;margin-bottom:14px;color:#3A2410}
+.cork-h b{font-family:var(--disp);font-size:24px;font-weight:600;background:#FFFDF6;padding:2px 14px;border-radius:8px;transform:rotate(-1deg);box-shadow:0 3px 6px rgba(0,0,0,.2)}
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px 20px}
+.pin{position:relative;transform:rotate(var(--r));display:grid;gap:8px;justify-items:center;padding-top:8px}
+.pin .idcard{max-width:290px}
+.tack{position:absolute;top:0;left:50%;width:22px;height:22px;margin-left:-11px;border-radius:50%;z-index:4;background:radial-gradient(circle at 35% 30%,#FF9A8A,#D2453A 60%,#8E2A22);box-shadow:0 4px 4px rgba(0,0,0,.35)}
+.pin.mine .idcard{box-shadow:0 0 0 4px #FFD266,0 10px 0 #C9CFDA,0 18px 30px rgba(20,30,60,.25)}
+.me-tag{position:absolute;top:30px;right:-6px;z-index:5;background:#FFD266;color:#5B3A0A;font-family:var(--disp);font-size:13px;padding:2px 10px;border-radius:8px;transform:rotate(8deg);box-shadow:0 3px 0 #B78A1E}
+.delq{display:flex;gap:6px;align-items:center;background:#FFFDF6;border-radius:12px;padding:4px 8px;font-size:15px;color:#2E2A24}
+.center-t{text-align:center}
+@media (max-width:760px){.id-wrap{grid-template-columns:1fr}.id-edit .fields{grid-template-columns:1fr}}
+.idc-top b{white-space:nowrap;font-size:17px}.idc-top small{letter-spacing:.1em;white-space:nowrap}
+.idc-type{white-space:nowrap;font-size:12px;padding:3px 8px}
+.idc-badges em{font-size:11px}
+
+/* ---- dashboard ---- */
+.dash-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.seg2{display:flex;background:var(--surface);border-radius:12px;box-shadow:0 3px 0 var(--line);overflow:hidden}
+.seg2 button{border:0;background:none;padding:8px 16px;font-size:16px}
+.seg2 button.sel{background:#23304A;color:#fff}
+.srt{display:flex;gap:8px;align-items:center;font-size:16px;color:var(--muted)}
+.srt select{width:auto;padding:6px 10px;font-size:16px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.tile2{background:var(--surface);border-radius:20px;padding:14px 16px;box-shadow:0 6px 0 var(--line);display:grid;gap:0}
+.tile2 b{font-family:var(--disp);font-size:44px;line-height:1.1;color:#2F6FE0;font-variant-numeric:tabular-nums}
+.tile2:nth-child(2) b{color:#E3A21A}.tile2:nth-child(3) b{color:#2E9B57}.tile2:nth-child(4) b{color:#7B5BD6}
+.tile2 span{font-size:18px}.tile2 small{font-size:14px;color:var(--muted)}
+.dash-2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px}
+.dash-2 .mission + .mission{margin-top:0}
+.rbar{display:grid;gap:10px}
+.rb{display:grid;grid-template-columns:130px 1fr 52px;gap:10px;align-items:center;font-size:16px}
+.rb .bar{height:16px;border-radius:99px;background:var(--surface2);box-shadow:inset 0 1px 2px rgba(0,0,0,.1);overflow:hidden}
+.rb .bar i{display:block;height:100%;background:var(--rc);border-radius:99px}
+.rb b{text-align:right;font-variant-numeric:tabular-nums}
+.hard{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hard li{display:flex;gap:12px;align-items:flex-start}
+.hard .pct{flex:none;width:58px;text-align:center;font-family:var(--disp);font-size:20px;border-radius:12px;padding:4px 0;background:var(--me-soft);color:var(--me)}
+.hard .pct.mid{background:#FFF1CC;color:#A06A00}.hard .pct.low{background:var(--warn-soft);color:var(--warn)}
+.hard small{color:var(--muted);font-size:13px}.hard p{font-size:16px;line-height:1.4}
+.dtable{font-size:15px;min-width:820px}
+.dtable td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.drow{cursor:pointer}.drow:hover td{background:var(--surface2)}.drow.open td{background:var(--ai-soft)}
+.dots{display:inline-flex;gap:3px}.dots i{width:12px;height:12px;border-radius:50%;background:var(--surface2);box-shadow:inset 0 0 0 1.5px var(--line)}
+.dots i.on{background:#E3A21A;box-shadow:none}
+td.live{color:var(--me)}td.live::before{content:"● ";}
+.muted{color:var(--muted)}
+.ddetail td{background:var(--surface2)}
+.det{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.det ul{margin:4px 0 0;padding-left:18px;font-size:14px;line-height:1.5}
+.det li.ok{color:var(--me)}.det li.no{color:var(--warn)}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,1fr)}.dash-2{grid-template-columns:1fr}.det{grid-template-columns:1fr}.rb{grid-template-columns:100px 1fr 44px}}
+.dash-2 .mission,.mission{align-content:start}
+
+/* ---- home fits one screen ---- */
+body[data-view="home"],body[data-view="map"]{padding-bottom:12px}
+body[data-view="home"] .top,body[data-view="map"] .top{margin-bottom:14px}
+.home-fit{height:calc(var(--appH,100dvh) - var(--topH,78px) - 46px);min-height:520px;display:flex;flex-direction:column;margin-bottom:0}
+.home-fit .scene-in{flex:1;min-height:0;padding:8px 26px 12px;gap:8px;grid-template-rows:auto 1fr}
+.home-fit .sign-board h1{font-size:clamp(28px,min(calc(var(--vw1,1vw)*6),calc(var(--vh1,1vh)*7)),58px)}
+.home-fit .sign-hang{padding-top:14px}
+.home-fit .scene-grid{min-height:0;align-items:center}
+.home-fit .orb-stage{height:min(290px,calc(var(--vh1,1vh)*33))}
+.home-fit .orb-stage .orb{width:min(150px,calc(var(--vh1,1vh)*17));height:min(150px,calc(var(--vh1,1vh)*17))}
+.home-fit .pedestal{bottom:12%}
+.home-fit .chalkboard{min-height:0}
+.home-fit .desk{padding:10px 26px 12px}
+.home-fit .desk p{font-size:15px}
+.scene{background:linear-gradient(color-mix(in srgb,var(--wall) 60%,#fff) 0 70%,var(--floor) 70%)}
+.scene::before{top:70%}
+#start{display:inline-flex;gap:8px;align-items:center;white-space:nowrap}
+#start svg{width:22px;height:22px}
+input.need{border-color:var(--warn);background:var(--warn-soft)}
+@media (max-width:760px){.home-fit{height:auto;min-height:0}.home-fit .orb-stage{height:230px}}
+/* ---- floor plan ---- */
+.plan-wrap{display:grid;gap:10px}
+.plan-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.plan-head small{color:var(--wood);font-size:16px}
+.plan-head h2{font-size:32px}
+.plan-stat{display:flex;gap:10px;align-items:center;background:var(--surface);padding:6px 14px;border-radius:999px;box-shadow:0 3px 0 var(--line)}
+.plan-stat .dots i{width:16px;height:16px}
+.plan{--wall:#7E5230;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:minmax(150px,calc((var(--appH,100dvh) - var(--topH,78px) - 284px)/2)) 110px minmax(150px,calc((var(--appH,100dvh) - var(--topH,78px) - 284px)/2));
+  border:12px solid var(--wall);border-radius:18px;background:var(--wall);gap:8px;box-shadow:0 10px 0 #5A3A1F,0 20px 30px rgba(60,35,10,.3);position:relative}
+.proom{position:relative;border:0;padding:0;overflow:hidden;background:none;display:grid;place-items:center;align-content:center;gap:4px;color:#2E2A24;text-align:center;border-radius:4px}
+.proom .floor{position:absolute;inset:0;background:
+  linear-gradient(45deg,color-mix(in srgb,var(--rc) 16%,#fff) 25%,transparent 25% 75%,color-mix(in srgb,var(--rc) 16%,#fff) 75%) 0 0/36px 36px,
+  linear-gradient(45deg,color-mix(in srgb,var(--rc) 16%,#fff) 25%,transparent 25% 75%,color-mix(in srgb,var(--rc) 16%,#fff) 75%) 18px 18px/36px 36px,
+  color-mix(in srgb,var(--rc) 8%,#FFFBF3);transition:filter .2s}
+.proom:hover .floor{filter:brightness(1.05) saturate(1.2)}
+.proom::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 4px color-mix(in srgb,var(--rc) 45%,transparent),inset 0 10px 18px rgba(0,0,0,.08);pointer-events:none;border-radius:4px}
+.doorway{position:absolute;left:50%;width:80px;height:12px;margin-left:-40px;background:#E8C99B;z-index:1;box-shadow:0 0 0 2px rgba(126,82,48,.25)}
+.proom.up .doorway{bottom:0}.proom.dn .doorway{top:0}
+.doorway i{display:none}
+.furn{position:relative;z-index:1;width:clamp(58px,calc(var(--vh1,1vh)*9),84px);height:clamp(58px,calc(var(--vh1,1vh)*9),84px);border-radius:22px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(color-mix(in srgb,var(--rc) 75%,#fff),var(--rc));box-shadow:inset 0 3px 0 rgba(255,255,255,.4),0 6px 0 color-mix(in srgb,var(--rc) 55%,#000),0 10px 14px rgba(0,0,0,.15)}
+.furn svg{width:55%;height:55%}
+.pname{position:relative;z-index:1;font-family:var(--disp);font-size:clamp(19px,calc(var(--vh1,1vh)*2.6),24px);margin-top:4px}
+.pkey{position:relative;z-index:1;font-size:14px;color:color-mix(in srgb,var(--rc) 80%,#2E2A24);background:#fff;border-radius:8px;padding:0 10px;box-shadow:0 2px 0 color-mix(in srgb,var(--rc) 30%,transparent)}
+.pnum{position:absolute;left:10px;top:10px;z-index:1;width:34px;height:34px;border-radius:50%;background:var(--rc);color:#fff;font-family:var(--disp);display:grid;place-items:center;font-size:18px;box-shadow:0 3px 0 color-mix(in srgb,var(--rc) 55%,#000)}
+.proom.dn .pnum{top:auto;bottom:10px}
+.pstar{position:absolute;right:10px;top:10px;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;background:radial-gradient(circle at 35% 30%,#FFE9A8,#E3A21A 60%,#B77A06);box-shadow:0 3px 0 #9A6A10;transform:rotate(10deg)}
+.proom.dn .pstar{top:auto;bottom:10px}
+.pstar svg{width:22px;height:22px}
+.proom.done .floor{filter:saturate(.75)}
+.here{position:relative;z-index:2;margin-top:2px;background:#FFD266;color:#5B3A0A;font-family:var(--disp);font-size:14px;padding:2px 10px;border-radius:999px;box-shadow:0 3px 0 #B78A1E}
+
+.proom.next::after{box-shadow:inset 0 0 0 5px #FFD266,inset 0 10px 18px rgba(0,0,0,.08)}
+@media (prefers-reduced-motion:no-preference){.proom.next .furn{animation:hop 1.4s ease-in-out infinite}}
+.hall{grid-column:1/-1;position:relative;border-radius:4px;display:flex;align-items:center;gap:16px;padding:0 18px;
+  background:repeating-linear-gradient(90deg,#E8C99B 0 58px,#DDBB88 58px 60px);box-shadow:inset 0 6px 10px rgba(0,0,0,.12)}
+.entrance{display:flex;align-items:center;gap:10px;position:relative;z-index:1;max-width:44%}
+.entrance .orb{width:54px;height:54px;flex:none;box-shadow:0 0 0 4px #fff,0 0 20px 4px color-mix(in srgb,var(--glow) 70%,transparent)}
+.entrance .orb::after{font-size:18px}
+.entrance span{background:#fff;border-radius:14px;padding:6px 12px;font-size:16px;box-shadow:0 3px 0 rgba(0,0,0,.1);color:#2E2A24}
+.path{position:absolute;left:12%;right:12%;top:50%;border-top:4px dashed rgba(126,82,48,.35)}
+.hall-sign{position:absolute;left:50%;transform:translateX(-50%);font-size:13px;color:#7E5230;background:rgba(255,255,255,.7);padding:0 10px;border-radius:6px;white-space:nowrap}
+.hall-sign.up{top:6px}.hall-sign.down{bottom:6px}
+.exit{margin-left:auto;position:relative;z-index:1;--rc:#2F6FE0}
+.exit.green{--rc:#2E9B57}
+@media (max-width:760px){
+  .plan{grid-template-columns:1fr 1fr;grid-template-rows:none;grid-auto-rows:170px}
+  .hall{grid-column:1/-1;grid-row:3;flex-wrap:wrap;padding:12px;min-height:130px}
+  .entrance{max-width:100%}.hall-sign{display:none}.exit{margin:0}
+}
+/* ---- locks & reset ---- */
+.plan-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+#rsBox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rsq{font-size:15px;color:var(--warn);background:var(--warn-soft);padding:4px 10px;border-radius:10px}
+.proom.locked .floor{filter:grayscale(.6) brightness(.86)}
+.proom.locked .pname,.proom.locked .pkey,.proom.locked .pnum{opacity:0}
+.proom.locked .furn{opacity:.3;filter:grayscale(.8)}
+.proom.locked::after{box-shadow:inset 0 0 0 4px rgba(0,0,0,.12),inset 0 10px 18px rgba(0,0,0,.12)}
+.lockv{position:absolute;inset:0;z-index:3;display:grid;place-content:center;justify-items:center;gap:6px;padding:10px;background:rgba(40,32,26,.16)}
+.lockv .lk{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(#F3F5F8,#B8C1CE);color:#4A5568;box-shadow:0 4px 0 #7A8597,0 8px 14px rgba(0,0,0,.25)}
+.lockv .lk svg{width:26px;height:26px}
+.lockv b{font-family:var(--disp);font-size:19px;font-weight:600;color:#fff;background:rgba(46,38,32,.78);padding:2px 14px;border-radius:999px}
+.lockv small{font-size:14px;line-height:1.4;max-width:20em;text-wrap:balance;text-align:center;color:#3A2E24;background:rgba(255,255,255,.85);padding:3px 10px;border-radius:10px}
+.proom.locked{cursor:not-allowed}
+@media (prefers-reduced-motion:no-preference){.proom.shake{animation:shk .35s ease 2}}
+.entrance.warn span{background:#FFF1CC;color:#7A4B00;box-shadow:0 3px 0 #E3A21A}
+.locked-btn{display:inline-flex;gap:6px;align-items:center;opacity:.6}
+.locked-btn svg{width:18px;height:18px}
+@keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* ---- 본문 가독성: 본문은 본고딕, 제목·버튼은 도현체 ---- */
+body{font-weight:500;letter-spacing:0}
+b,strong,.note b{font-weight:800}
+.lead{color:color-mix(in srgb,var(--ink) 88%,var(--surface));font-weight:500}
+.note,.coby .say,.sent,.q,.bubble,.aithink p,.solo .meta,.pkey,.lockv small,.room .plate p,.det,.hard p,td,.idc-info dd,.idc-pledge{font-family:var(--body)}
+.mission > h3:first-child{font-size:23px;letter-spacing:.01em}
+@media (prefers-reduced-motion:no-preference){.step-in{animation:slidein .25s ease both}}
+.badge-btn{display:inline-flex;gap:8px;align-items:center}
+.badge-btn svg{width:22px;height:22px}
+@media (prefers-reduced-motion:no-preference){.badge-btn{animation:glowp 1.6s ease-in-out infinite}}
+@keyframes glowp{50%{box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 5px 0 color-mix(in srgb,var(--rc) 55%,#000),0 0 0 8px rgba(227,162,26,.35)}}
+
+/* ---- 유니 NPC ---- */
+.uni{display:inline-block;flex:none;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 35%,#F2F8FF,#C4DCFA 70%,#A9C9F3);box-shadow:0 0 0 3px #fff,0 5px 10px rgba(20,40,90,.22);width:44px;height:44px;vertical-align:middle}
+.uni svg{width:100%;height:100%;display:block}
+.coby .uni{width:78px;height:78px;box-shadow:0 0 0 4px #fff,0 6px 14px rgba(20,40,90,.28)}
+.entrance .uni{width:64px;height:64px}
+.claim .said .uni{width:40px;height:40px}.claim.big .said .uni{width:56px;height:56px}
+.a .uni{width:48px;height:48px}
+.aithink .uni{width:48px;height:48px}
+.train-box .uni{width:110px;height:110px}
+.uni .eyes{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:no-preference){
+  .uni .eyes{animation:blink 4.6s infinite}
+  .uni.happy{animation:hop .5s ease 2}
+  .uni.confused{animation:wob .45s ease 2}
+  .uni.think{animation:bob 1.2s ease-in-out infinite}
+}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-3deg)}}
+.stage-banner .coby .uni{box-shadow:0 0 0 4px rgba(255,255,255,.9),0 6px 14px rgba(0,0,0,.2)}
+@media (max-width:480px){.coby .uni{width:58px;height:58px}}
+.entrance span.uni,.entrance.warn span.uni{padding:0;border-radius:50%;background:radial-gradient(circle at 50% 35%,#F2F8FF,#C4DCFA 70%,#A9C9F3);box-shadow:0 0 0 4px #fff,0 5px 10px rgba(20,40,90,.22);color:inherit}
+.orb.cute{background:radial-gradient(circle at 34% 26%,#fff 0 5%,#CBE6FF 13%,#79B4FA 40%,#3F78E6 74%,#2A58C4 100%)}
+.orb.cute::after{content:none}
+.orb.cute .face{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.orb.cute .eyes{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:no-preference){.orb.cute .eyes{animation:blink 4.6s infinite}.orb.cute.think{animation:bob 1.2s ease-in-out infinite}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-4deg)}}
+.coby,.entrance,.a,.claim .said,.aithink{overflow:visible}
+.coby .orb.cute{margin-top:10px}
+
+/* ============ 화면 크기별 최적화 ============ */
+#fx{width:100%;height:100%}
+/* 휴대폰 */
+html[data-screen="phone"] .rail{display:none}
+html[data-screen="phone"] .top .wrap{gap:6px}
+html[data-screen="phone"] .tbtn{padding:5px 10px;font-size:13px}
+html[data-screen="phone"] .brand span{font-size:17px}
+html[data-screen="phone"] .brand .mini-orb{width:28px;height:28px}
+html[data-screen="phone"] #fs{display:none}
+html[data-screen="phone"] .stage-h h2{font-size:26px}
+html[data-screen="phone"] .stage-banner{padding:14px 14px}
+html[data-screen="phone"] .mission{padding:18px 14px}
+html[data-screen="phone"] .choice .btn{font-size:19px;padding:14px 16px}
+html[data-screen="phone"] .solo .em{font-size:84px}
+html[data-screen="phone"] .sign-board h1{font-size:30px}
+/* 태블릿·터치 화면: 누르기 쉬운 크기 */
+html[data-touch="1"] .btn{min-height:50px}
+html[data-touch="1"] .tbtn,html[data-touch="1"] .chip,html[data-touch="1"] .judge button{min-height:42px}
+html[data-touch="1"] .seg button{min-height:40px}
+html[data-touch="1"] .sent{padding:10px 10px}
+/* 세로로 든 태블릿 */
+html[data-screen="tablet"][data-orient="portrait"] .home-fit{height:auto;min-height:0}
+html[data-screen="tablet"][data-orient="portrait"] .scene-grid{grid-template-columns:1fr}
+html[data-screen="tablet"][data-orient="portrait"] .orb-stage{height:260px}
+html[data-screen="tablet"][data-orient="portrait"] .desk{grid-template-columns:1fr}
+html[data-screen="tablet"][data-orient="portrait"] .plan{grid-template-columns:repeat(3,1fr);grid-template-rows:230px 120px 230px}
+html[data-screen="tablet"][data-orient="portrait"] .hall{grid-column:1/-1;grid-row:auto}
+/* 전자칠판: 멀리서도 보이게 전체 확대(zoom) + 넓은 여백 */
+html[data-screen="board"] .wrap{max-width:1180px}
+html[data-screen="board"] .uni,html[data-screen="board"] .orb{box-shadow:0 0 0 4px #fff,0 0 26px 6px color-mix(in srgb,var(--glow) 60%,transparent)}
+.fsbtn{display:inline-flex;align-items:center;gap:4px}
+html[data-screen="tablet"] .tbtn,html[data-screen="pc"] .tbtn{padding:6px 11px;font-size:14px}
+html[data-screen="tablet"] .rail .b{width:26px;height:26px;font-size:12px}
+html[data-screen="tablet"] .top .wrap{gap:8px;flex-wrap:nowrap}
+html[data-screen="tablet"] .brand span{font-size:19px}
+html[data-screen="tablet"] .xp{font-size:13px}
+.fsbtn{padding:6px 9px!important}
+
+.tbtn,.brand span,.xp,.sign-board h1{white-space:nowrap}
+html[data-screen="tablet"][data-orient="portrait"] .rail{display:none}
+html[data-screen="tablet"][data-orient="portrait"] .top .wrap{flex-wrap:wrap}
+html[data-screen="phone"] .sign-board{padding:6px 18px 10px}
+html[data-screen="phone"] .sign-board h1,html[data-screen="phone"] .home-fit .sign-board h1{font-size:27px}
+html[data-screen="phone"] .xp{font-size:12px}
+
+html[data-screen="phone"] .plan{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:auto;border-width:8px;gap:6px}
+html[data-screen="phone"] .proom{min-height:108px;grid-template-columns:auto 1fr;justify-items:start;align-content:center;text-align:left;padding:12px 14px 12px 54px;column-gap:14px;row-gap:4px}
+html[data-screen="phone"] .proom .furn{grid-row:1/span 3;width:62px;height:62px}
+html[data-screen="phone"] .proom .pname{margin:0;font-size:20px}
+html[data-screen="phone"] .proom .pnum,html[data-screen="phone"] .proom.dn .pnum{top:50%;bottom:auto;margin-top:-17px}
+html[data-screen="phone"] .proom .pstar,html[data-screen="phone"] .proom.dn .pstar{top:10px;bottom:auto}
+html[data-screen="phone"] .doorway{display:none}
+html[data-screen="phone"] .hall{grid-row:auto;flex-wrap:wrap;padding:12px;min-height:0;gap:10px}
+html[data-screen="phone"] .hall .path,html[data-screen="phone"] .hall-sign{display:none}
+html[data-screen="phone"] .entrance{max-width:100%}
+html[data-screen="phone"] .exit{margin:0;width:100%}
+html[data-screen="phone"] .lockv{grid-auto-flow:column;grid-template-columns:auto auto;place-content:center;column-gap:10px;text-align:left}
+html[data-screen="phone"] .lockv .lk{grid-row:1/span 2;width:44px;height:44px}
+html[data-screen="phone"] .lockv b,html[data-screen="phone"] .lockv small{justify-self:start;text-align:left}
+html[data-screen="phone"] .plan-tools{justify-content:flex-start}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <button class="brand" id="goHome" aria-label="첫 화면으로 가기"><div class="orb mini-orb"></div><span>AI 탐험 연구소</span></button>
+    <div class="rail" id="rail" aria-label="모은 배지"></div>
+    <span class="xp" id="xp"></span>
+    <button class="tbtn snd" id="snd" aria-label="소리 켜고 끄기"></button>
+    <button class="tbtn" id="goMap">지도</button>
+    <button class="tbtn" id="goBoard">게시판</button>
+    <button class="tbtn" id="goTeacher">선생님 현황판</button>
+    <button class="tbtn fsbtn" id="fs" aria-label="전체 화면" title="전체 화면"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="layer"></div>
+
+<script>
+(function(){
+const KEY='ai-lab-v2';
+const ICON={
+  book:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 5c3-1 6-1 9 1v14c-3-2-6-2-9-1z" fill="currentColor" fill-opacity=".15"/><path d="M21 5c-3-1-6-1-9 1v14c3-2 6-2 9-1z" fill="currentColor" fill-opacity=".15"/></svg>',
+  gear:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>',
+  warn:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 20h20z" fill="currentColor" fill-opacity=".15"/><path d="M12 10v4M12 17v.5"/></svg>',
+  lens:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="10" cy="10" r="6" fill="currentColor" fill-opacity=".15"/><path d="m15 15 6 6"/></svg>',
+  shield:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z" fill="currentColor" fill-opacity=".15"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></svg>',
+  check:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>',
+  lock:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  face:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/><path d="M3 3l18 18"/></svg>',
+  copy:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M15 9.5a4 4 0 1 0 0 5"/></svg>',
+  friends:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c.5-3.5 3-5 6-5s5.5 1.5 6 5M14 15c3 0 6 1.5 6.5 5"/></svg>',
+  map:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>',
+  medal:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8-4.3-4.1 5.9-.8z" fill="currentColor"/></svg>'
+};
+const ROOMS=[
+ {id:1,key:'원리',name:'원리의 방',ic:'book',desc:'예시를 보여 주며 AI를 직접 가르쳐 봐요.'},
+ {id:2,key:'한계',name:'한계의 방',ic:'gear',desc:'치우친 데이터로 배운 AI가 어떻게 틀리는지 봐요.'},
+ {id:3,key:'위험요인',name:'위험의 방',ic:'warn',desc:'그럴듯하지만 틀린 AI의 답을 찾아내요.'},
+ {id:4,key:'비판적 수용',name:'탐정단 본부',ic:'lens',desc:'AI의 말을 믿을지, 확인할지 판단해요.'},
+ {id:5,key:'안전한 사용',name:'안전 방패실',ic:'shield',desc:'개인정보·초상권·저작권을 지키는 법을 익혀요.'},
+ {id:6,key:'책임 있는 표현',name:'표현 게시판',ic:'check',desc:'AI가 만든 부분과 내가 만든 부분을 밝혀요.'}
+];
+
+/* ---------- state ---------- */
+const DEFAULT_S6=[
+ {t:'우리 동네 무안에는 넓은 갯벌이 있다.',w:'me'},
+ {t:'갯벌에는 짱뚱어와 칠게 같은 생물이 많이 산다.',w:'ai'},
+ {t:'나는 지난 여름 가족과 갯벌 체험을 하며 칠게를 잡았다.',w:'me'},
+ {t:'갯벌은 바닷물을 깨끗하게 해 주는 중요한 곳이다.',w:'ai'},
+ {t:'그래서 나는 갯벌을 아끼는 우리 동네가 자랑스럽다.',w:'me'}
+];
+function fresh(){return{name:'',done:{},s1:{},s2:{added:false,trained:false},s3:{},s4:{},s5:{i:0,ans:[]},s6:{title:'우리 동네 자랑하기',tool:'챗GPT',lines:DEFAULT_S6.map(x=>({...x})),checks:[false,false,false]},pledge:'',school:'',klass:'',av:null,postId:'',sid:'',start:0,view:'home'};}
+let S=fresh();
+try{const raw=localStorage.getItem(KEY); if(raw){S=Object.assign(fresh(),JSON.parse(raw));}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}scheduleSync();}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function doneCount(){return ROOMS.filter(r=>S.done[r.id]).length;}
+
+/* ---------- 유니 (사람 모습의 NPC) ---------- */
+let UNI_N=0;
+function uniSVG(m){
+  const p='u'+(UNI_N++);
+  const g=(id,a,b,c,cx,cy)=>`<radialGradient id="${p}${id}" cx="${cx||'38%'}" cy="${cy||'30%'}" r="75%"><stop offset="0" stop-color="${a}"/><stop offset=".6" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></radialGradient>`;
+  const eyes={
+    happy:`<path d="M42 61 Q48 54 54 61" stroke="#2A2020" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M66 61 Q72 54 78 61" stroke="#2A2020" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    think:`<g class="eyes"><ellipse cx="47" cy="58" rx="4.6" ry="5.6" fill="#2A2020"/><ellipse cx="71" cy="58" rx="4.6" ry="5.6" fill="#2A2020"/><circle cx="45.6" cy="55.6" r="1.7" fill="#fff"/><circle cx="69.6" cy="55.6" r="1.7" fill="#fff"/></g>`,
+    '':`<g class="eyes"><ellipse cx="48" cy="60" rx="4.8" ry="5.8" fill="#2A2020"/><ellipse cx="72" cy="60" rx="4.8" ry="5.8" fill="#2A2020"/><circle cx="49.8" cy="57.6" r="1.8" fill="#fff"/><circle cx="73.8" cy="57.6" r="1.8" fill="#fff"/></g>`
+  };
+  eyes.confused=eyes[''];
+  const brows={
+    confused:`<path d="M41 49 L54 46" stroke="#33406B" stroke-width="3" stroke-linecap="round"/><path d="M66 45 L79 50" stroke="#33406B" stroke-width="3" stroke-linecap="round"/>`,
+    think:`<path d="M42 46 Q47 43 53 46" stroke="#33406B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M66 44 Q72 41 78 45" stroke="#33406B" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    '':`<path d="M42 49 Q48 46 54 49" stroke="#33406B" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M66 49 Q72 46 78 49" stroke="#33406B" stroke-width="3" fill="none" stroke-linecap="round"/>`
+  };
+  brows.happy=brows[''];
+  const mouth={
+    happy:`<path d="M51 71 Q60 85 69 71 Z" fill="#8E3B3B"/><path d="M55 77 Q60 81 65 77 Q60 75 55 77 Z" fill="#F08A8A"/>`,
+    confused:`<path d="M52 75 Q56 72 60 75 Q64 78 68 75" stroke="#8E3B3B" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    think:`<ellipse cx="62" cy="75" rx="3" ry="3.6" fill="#8E3B3B"/>`,
+    '':`<path d="M53 72 Q60 79 67 72" stroke="#8E3B3B" stroke-width="3.2" fill="none" stroke-linecap="round"/>`
+  };
+  const extra={
+    confused:`<path d="M92 44 C95 50 97 53 94 56 C91 58 88 55 89 52 C90 49 91 47 92 44 Z" fill="#8FD0FF" stroke="#fff" stroke-width="1"/>`,
+    happy:`<path d="M96 26 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z" fill="#FFD266"/><path d="M20 34 l1.4 3.4 3.4 1.4 -3.4 1.4 -1.4 3.4 -1.4 -3.4 -3.4 -1.4 3.4 -1.4 z" fill="#FFD266"/>`,
+    think:`<circle cx="92" cy="30" r="3" fill="#fff" opacity=".9"/><circle cx="99" cy="22" r="4.2" fill="#fff" opacity=".9"/>`,
+    '':''
+  };
+  m=m in mouth?m:'';
+  return `<svg viewBox="12 10 96 96" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>${g('k','#FFEBDD','#F8CFB0','#DDA37E')}${g('h','#5B6BA6','#2F3B6E','#1A2248','35%','22%')}${g('c','#FFFFFF','#EEF2F7','#C9D1DC','40%','15%')}
+  <radialGradient id="${p}gl"><stop offset="0" stop-color="#E6F7FF"/><stop offset=".5" stop-color="#5EC8FF"/><stop offset="1" stop-color="#2F6FE0"/></radialGradient></defs>
+  <path d="M12 124 C14 100 36 91 60 91 C84 91 106 100 108 124 Z" fill="url(#${p}c)"/>
+  <path d="M51 92 L60 108 L69 92 Z" fill="#3C7BEA"/>
+  <path d="M48 91 L58 108 L50 114 L42 97 Z" fill="#F7F9FC" stroke="#D5DCE6" stroke-width="1.2"/><path d="M72 91 L62 108 L70 114 L78 97 Z" fill="#F7F9FC" stroke="#D5DCE6" stroke-width="1.2"/>
+  <rect x="80" y="102" width="14" height="9" rx="2" fill="#E4EAF2"/><circle cx="87" cy="106.5" r="2.4" fill="#5EC8FF"/>
+  <rect x="53" y="80" width="14" height="14" rx="6" fill="#DDA37E"/>
+  <path d="M24 60 C22 26 42 15 60 15 C80 15 99 27 96 60 L98 84 C92 91 83 89 81 82 L81 60 L39 60 L39 82 C37 89 28 91 22 84 Z" fill="url(#${p}h)"/>
+  <circle cx="60" cy="57" r="33" fill="url(#${p}k)"/>
+  <ellipse cx="49" cy="38" rx="13" ry="6" fill="#fff" opacity=".35"/>
+  <path d="M26 57 C27 30 43 21 60 21 C78 21 94 31 94 57 C87 44 77 37 67 37 C63 44 50 48 36 46 C32 50 28 53 26 57 Z" fill="url(#${p}h)"/>
+  <path d="M36 32 C44 26 52 24 58 25" stroke="#8A9AD6" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".7"/>
+  <circle cx="86" cy="38" r="6" fill="url(#${p}gl)" stroke="#fff" stroke-width="1.6"/><circle cx="84.5" cy="36.5" r="1.6" fill="#fff"/>
+  <ellipse cx="41" cy="70" rx="6.5" ry="4" fill="#FF8C8C" opacity="${m==='happy'?.65:.45}"/><ellipse cx="79" cy="70" rx="6.5" ry="4" fill="#FF8C8C" opacity="${m==='happy'?.65:.45}"/>
+  ${brows[m]}${eyes[m]}${mouth[m]}${extra[m]}
+  </svg>`;
+}
+function uniFace(m){
+  const ink='#1B2A55';
+  const eyes={
+    '':`<g class="eyes"><ellipse cx="35" cy="50" rx="7.5" ry="9.5" fill="${ink}"/><ellipse cx="65" cy="50" rx="7.5" ry="9.5" fill="${ink}"/><circle cx="37.8" cy="45.6" r="3" fill="#fff"/><circle cx="67.8" cy="45.6" r="3" fill="#fff"/><circle cx="32.6" cy="54" r="1.4" fill="#fff"/><circle cx="62.6" cy="54" r="1.4" fill="#fff"/></g>`,
+    happy:`<path d="M27 51 Q35 41 43 51" stroke="${ink}" stroke-width="4.2" fill="none" stroke-linecap="round"/><path d="M57 51 Q65 41 73 51" stroke="${ink}" stroke-width="4.2" fill="none" stroke-linecap="round"/>`,
+    confused:`<g class="eyes"><ellipse cx="35" cy="51" rx="6.5" ry="8" fill="${ink}"/><ellipse cx="65" cy="51" rx="6.5" ry="8" fill="${ink}"/><circle cx="37" cy="47.5" r="2.4" fill="#fff"/><circle cx="67" cy="47.5" r="2.4" fill="#fff"/></g><path d="M27 40 L41 35" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M59 35 L73 40" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/>`,
+    think:`<g class="eyes"><ellipse cx="33" cy="46" rx="7" ry="9" fill="${ink}"/><ellipse cx="63" cy="46" rx="7" ry="9" fill="${ink}"/><circle cx="31" cy="41.5" r="3" fill="#fff"/><circle cx="61" cy="41.5" r="3" fill="#fff"/></g>`
+  };
+  const mouth={
+    '':`<path d="M43 64 Q50 71 57 64" stroke="${ink}" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
+    happy:`<path d="M40 61 Q50 78 60 61 Z" fill="${ink}"/><path d="M44 68 Q50 74 56 68 Q50 65 44 68 Z" fill="#FF8FA8"/>`,
+    confused:`<path d="M42 67 Q46 63 50 67 Q54 71 58 67" stroke="${ink}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
+    think:`<ellipse cx="52" cy="66" rx="3.6" ry="4.2" fill="${ink}"/>`
+  };
+  const extra={
+    '':'',
+    happy:`<path d="M88 20 l2.4 5.6 5.6 2.4 -5.6 2.4 -2.4 5.6 -2.4 -5.6 -5.6 -2.4 5.6 -2.4z" fill="#FFE27A"/><path d="M10 30 l1.6 3.6 3.6 1.6 -3.6 1.6 -1.6 3.6 -1.6 -3.6 -3.6 -1.6 3.6 -1.6z" fill="#FFE27A"/>`,
+    confused:`<path d="M84 34 C88 42 90 46 86 50 C82 53 78 49 79 45 C80 41 82 38 84 34 Z" fill="#CFEFFF" stroke="#fff" stroke-width="1.2"/>`,
+    think:`<circle cx="84" cy="22" r="3.2" fill="#fff" opacity=".9"/><circle cx="92" cy="12" r="4.6" fill="#fff" opacity=".9"/>`
+  };
+  m=m in mouth?m:'';
+  return `<svg class="face" viewBox="9 9 82 82" aria-hidden="true">
+    <path d="M50 4 Q52 -6 50 -12" stroke="#2A58C4" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <circle cx="50" cy="-15" r="6" fill="#FFD266" stroke="#fff" stroke-width="1.6"/><circle cx="48" cy="-17" r="1.8" fill="#fff"/>
+    <ellipse cx="24" cy="63" rx="8" ry="5" fill="#FF9BB6" opacity="${m==='happy'?.9:.7}"/><ellipse cx="76" cy="63" rx="8" ry="5" fill="#FF9BB6" opacity="${m==='happy'?.9:.7}"/>
+    ${eyes[m]}${mouth[m]}${extra[m]}</svg>`;
+}
+function uni(m){return `<div class="orb cute ${m||''}" aria-hidden="true">${uniFace(m||'')}</div>`;}
+
+/* ---- fun: xp, sound, mascot, effects ---- */
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const LV=[[0,'견습 연구원'],[200,'연구원'],[450,'선임 연구원'],[750,'수석 연구원']];
+function lvInfo(){const x=S.xp||0;let i=0;LV.forEach((l,k)=>{if(x>=l[0])i=k;});const nx=LV[i+1];return{name:LV[i][1],next:nx,pct:nx?Math.round((x-LV[i][0])/(nx[0]-LV[i][0])*100):100};}
+function award(key,pts){S.aw=S.aw||{};if(S.aw[key])return 0;const before=lvInfo().name;S.aw[key]=true;S.xp=(S.xp||0)+pts;save();renderRail();toast('+'+pts+' XP');
+  const after=lvInfo().name; if(after!==before) setTimeout(()=>{toast('등급 상승! '+after);SFX.badge();},900); return pts;}
+let SND=true; try{SND=localStorage.getItem(KEY+'-snd')!=='0';}catch(e){}
+let AC=null;
+function tone(seq){if(!SND)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t0=AC.currentTime+.01;
+  seq.forEach(([f,d,st])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(AC.destination);const t=t0+st;
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.2,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.05);});}catch(e){}}
+const SFX={good:()=>tone([[660,.14,0],[990,.22,.1]]),bad:()=>tone([[260,.2,0],[190,.3,.13]]),tap:()=>tone([[540,.06,0]]),
+  badge:()=>tone([[523,.14,0],[659,.14,.12],[784,.14,.24],[1047,.45,.36]]),train:()=>tone([[400,.08,0],[500,.08,.25],[600,.08,.5],[700,.08,.75],[800,.08,1],[1000,.2,1.25]])};
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1700);}
+function confetti(){if(RM)return;const c=document.getElementById('fx'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#2A66DA','#E3A21A','#1F935A','#D2453A','#8DBEFF','#B97D40'];
+  const P=Array.from({length:140},()=>({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*16,vy:-Math.random()*15-4,r:Math.random()*6+4,c:cols[Math.random()*cols.length|0],a:Math.random()*6,s:Math.random()*.3-.15}));
+  let f=0;(function tick(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.45;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.s;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore();});
+  if(++f<130)requestAnimationFrame(tick);else x.clearRect(0,0,c.width,c.height);})();}
+function badgeModal(id){const r=ROOMS[id-1],L=document.getElementById('layer');award('b'+id,50);renderRail();
+  L.innerHTML=`<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mh"><div class="bigmedal">${ICON.medal}</div>
+  <h3 id="mh">'${r.key}' 배지 획득!</h3><p>${r.name}을 통과했어요. 보너스 +50 XP</p><p class="lead">모은 배지 ${doneCount()} / 6</p>
+  <button class="btn" id="mok">${id<6?'다음 방으로 가기':'연구원증 받으러 가기'}</button><button class="btn alt" id="mstay">이 방 더 둘러보기</button></div></div>`;
+  confetti();SFX.badge();
+  document.getElementById('mok').onclick=()=>{L.innerHTML='';go(id<6?'s'+(id+1):'finish');};
+  document.getElementById('mstay').onclick=()=>{L.innerHTML='';keep(render);};
+  document.getElementById('mok').focus();}
+function trainAnim(label,cb){const L=document.getElementById('layer');
+  L.innerHTML=`<div class="overlay"><div class="train-box">${uni('think')}<h3>${label}</h3><div class="prog"><i id="tp"></i></div><p class="lead" id="tmsg">데이터를 살펴보는 중…</p></div></div>`;
+  SFX.train();const msgs=['데이터를 살펴보는 중…','공통점을 찾는 중…','규칙을 만드는 중…'];let k=0;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const tp=document.getElementById('tp');if(tp)tp.style.width='100%';}));
+  const iv=setInterval(()=>{const m=document.getElementById('tmsg');if(m)m.textContent=msgs[++k%3];},480);
+  setTimeout(()=>{clearInterval(iv);L.innerHTML='';cb();},RM?300:1450);}
+let MSG=null,lastTyped='';
+function say(t,m){MSG={t,m:m||''};}
+const INTRO={1:'안녕하세요, 연구원님! 저는 AI 조수 유니예요. 저는 아직 아무것도 몰라요. 사과와 귤을 구별하는 법을 가르쳐 주세요!',
+ 2:'이번엔 고양이와 강아지를 구별해 볼게요. 공부 자료는 연구소에서 미리 준비해 뒀어요. 자신 있어요!',
+ 3:'저는 모르는 것도 아는 척할 때가 있어요… 쉿! 제 답변에 숨겨 둔 거짓말을 찾을 수 있을까요?',
+ 4:'탐정단 본부에 온 걸 환영해요! 제 말이 늘 맞는 건 아니에요. 믿을지, 확인할지 판정해 주세요.',
+ 5:'AI를 쓸 때 지켜야 할 것들이 있어요. 안전한 행동은 O, 위험한 행동은 X! 연속으로 맞히면 콤보 보너스예요!',
+ 6:'제가 도와준 글이라도, 어디까지가 제 부분인지 솔직하게 밝혀 주세요. 그게 멋진 작가예요!'};
+function coby(id){const m=MSG||{t:INTRO[id],m:''};setTimeout(typeSay,0);
+  return `<div class="coby">${uni(m.m)}<div class="say" aria-live="polite"><b class="nm">유니</b><span id="sayt" data-full="${esc(m.t)}">${esc(m.t)}</span></div></div>`;}
+function typeSay(){const el=document.getElementById('sayt');if(!el)return;const full=el.dataset.full;if(full===lastTyped||RM){lastTyped=full;return;}
+  lastTyped=full;el.textContent='';let i=0;const iv=setInterval(()=>{if(!document.body.contains(el)){clearInterval(iv);return;}el.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(iv);},28);}
+function complete(id){if(!S.done[id]){S.done[id]=true;save();keep(render);}}
+
+const app=document.getElementById('app');
+function go(v){S.view=v;MSG=null;save();render();window.scrollTo({top:0,behavior:'smooth'});}
+document.getElementById('goHome').onclick=()=>go('home');
+document.getElementById('goTeacher').onclick=()=>go('dash');
+document.getElementById('goBoard').onclick=()=>go('board');
+document.getElementById('goMap').onclick=()=>go('map');
+
+function renderSnd(){document.getElementById('snd').textContent=SND?'소리 켬':'소리 끔';}
+document.getElementById('snd').onclick=()=>{SND=!SND;try{localStorage.setItem(KEY+'-snd',SND?'1':'0');}catch(e){}renderSnd();SFX.tap();};
+renderSnd();
+function renderRail(){
+  document.getElementById('xp').innerHTML=`<i>${ICON.medal}</i>${S.xp||0} XP`;
+  const got=r=>S.done[r.id]&&S.aw&&S.aw['b'+r.id];document.getElementById('rail').innerHTML=ROOMS.map(r=>`<span class="b ${got(r)?'on':''}" title="${r.name}${got(r)?' 완료':''}">${got(r)?'★':r.id}</span>`).join('');
+}
+function stageHead(r){
+  return `<section class="stage-banner"><div class="stage-h"><div class="ic">${ICON[r.ic]}</div><div><small>${r.id}번 방 · ${r.key}</small><h2>${r.name}</h2></div></div>${coby(r.id)}</section>`;
+}
+function footNav(id){
+  const prev=id>1?`<button class="btn alt" data-go="s${id-1}">← ${ROOMS[id-2].name}</button>`:`<button class="btn alt" data-go="map">← 연구소 지도</button>`;
+  const seen=S.aw&&S.aw['b'+id];
+  if(S.done[id]&&!seen) return `<div class="foot-nav">${prev}<button class="btn green badge-btn" data-badge="${id}">${ICON.medal} 배지 받기</button></div>`;
+  const next=id<6?(S.done[id]?`<button class="btn" data-go="s${id+1}">${ROOMS[id].name} →</button>`:`<button class="btn alt locked-btn" data-go="s${id+1}">${ICON.lock} ${ROOMS[id].name}</button>`):`<button class="btn ${S.done[id]?'':'alt'}" data-go="finish">연구원증 받기 →</button>`;
+  return `<div class="foot-nav">${prev}${next}</div>`;
+}
+function bindGo(){app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));app.querySelectorAll('[data-badge]').forEach(b=>b.onclick=()=>badgeModal(+b.dataset.badge));}
+
+/* ---------- HOME ---------- */
+function home(){
+  const n=doneCount();
+  app.innerHTML=`
+  <section class="scene home-fit">
+    <div class="scene-in">
+      <div class="sign-hang"><span class="rope l"></span><span class="rope r"></span><div class="sign-board"><h1>AI 탐험 연구소</h1></div></div>
+      <div class="scene-grid">
+        <div class="chalkboard"><p class="chalk-t">AI를 이해하는<br>우리가 만드는<br><em>더 좋은 세상</em></p><div class="chalk-list"><span>질문</span><span>탐구</span><span>생각</span></div></div>
+        <div class="orb-stage" aria-hidden="true"><div class="pedestal"></div><div class="orb big"></div><span class="tile" style="--c:#2F6FE0;top:4%;left:8%"><i></i>원리</span><span class="tile" style="--c:#E0931A;top:2%;left:46%"><i></i>한계</span><span class="tile" style="--c:#E0533F;top:10%;right:2%"><i></i>위험요인</span><span class="tile" style="--c:#7B5BD6;bottom:34%;left:6%"><i></i>비판적 수용</span><span class="tile" style="--c:#179A9A;bottom:2%;left:44%"><i></i>안전한 사용</span><span class="tile" style="--c:#2E9B57;bottom:34%;right:0"><i></i>책임 있는 표현</span></div>
+      </div>
+    </div>
+    <div class="desk">
+      <div><h2 style="font-size:24px">연구원님, AI의 비밀을 풀어 봐요!</h2><p>여섯 개의 방을 탐험하며 AI가 배우는 원리와 한계, 위험요인을 알아보고 AI를 바르고 안전하게 쓰는 법을 익혀요. 방을 통과할 때마다 배지를 받아요.</p></div>
+      <div class="note-paper">
+        <div class="namebox"><input id="nm" placeholder="연구원 이름을 적어요" value="${esc(S.name)}" aria-label="연구원 이름"><button class="btn" id="start">${ICON.map} 연구소 지도</button></div>
+        ${(()=>{const l=lvInfo();return `<div class="lvl"><div class="row"><b>${l.name} · 배지 ${n}/6</b><span>${S.xp||0} XP${l.next?` · 다음 등급까지 ${l.next[0]-(S.xp||0)}`:' · 최고 등급!'}</span></div><div class="prog"><i style="width:${l.pct}%;background:var(--gold)"></i></div></div>`})()}
+      </div>
+    </div>
+  </section>`;
+  const nm=document.getElementById('nm');
+  nm.oninput=()=>{S.name=nm.value.trim();save();};
+  nm.onkeydown=e=>{if(e.key==='Enter')document.getElementById('start').click();};
+  document.getElementById('start').onclick=()=>{S.name=nm.value.trim();if(!S.name){nm.focus();nm.placeholder='이름을 먼저 적어 주세요!';nm.classList.add('need');SFX.bad();return;}save();SFX.tap();go('map');};
+  bindGo();
+}
+
+/* ---------- 연구소 지도 (6개의 방 평면도) ---------- */
+function unlocked(id){return id===1||!!S.done[id-1];}
+let MAPMSG=null, MAPSHAKE=0, MAPRESET=false;
+function map(){
+  const n=doneCount(), next=ROOMS.find(r=>!S.done[r.id]);
+  const room=(r,pos)=>{const d=S.done[r.id], nx=next&&next.id===r.id, lk=!unlocked(r.id);
+    return `<button class="proom ${pos} ${d?'done':''} ${nx?'next':''} ${lk?'locked':''} ${lk&&MAPSHAKE===r.id?'shake':''}" data-room="${r.id}" data-id="${r.id}" aria-label="${r.id}번 ${r.name}${d?', 배지 획득':''}${nx?', 다음 방':''}${lk?', 잠김':''}">
+      <span class="floor" aria-hidden="true"></span>
+      <span class="doorway" aria-hidden="true"><i></i></span>
+      <span class="pnum">${r.id}</span>
+      ${d?`<span class="pstar" aria-hidden="true">${ICON.medal}</span>`:''}
+      <span class="furn">${ICON[r.ic]}</span>
+      <span class="pname">${r.name}</span>
+      <span class="pkey">${r.key}</span>
+      ${nx?`<span class="here">다음 방!</span>`:''}
+      ${lk?`<span class="lockv"><span class="lk">${ICON.lock}</span><b>${r.id}. ${r.name}</b><small>잠금 해제 전<br>${r.id-1}번 방을 통과하면 열려요</small></span>`:''}
+    </button>`;};
+  const hallMsg=MAPMSG||(n===6?'모든 방을 통과했어요!':`${esc(S.name)||'연구원'}님, ${next.id}번 방으로 가 볼까요?`);
+  app.innerHTML=`
+  <section class="plan-wrap">
+    <div class="plan-head">
+      <div><small>AI 탐험 연구소 · 평면도</small><h2>연구소 지도</h2></div>
+      <div class="plan-tools">
+        <div class="plan-stat"><span class="dots">${ROOMS.map(r=>`<i class="${S.done[r.id]?'on':''}"></i>`).join('')}</span><b>배지 ${n}/6</b></div>
+        <div id="rsBox">${MAPRESET?`<span class="rsq">배지와 점수가 모두 지워져요. 처음부터 할까요?</span><button class="btn sm" id="rsY" style="--rc:#D2453A">네, 처음부터</button><button class="btn alt sm" id="rsN">취소</button>`
+          :`<button class="btn alt sm" id="rs">↺ 처음부터 다시</button>`}</div>
+      </div>
+    </div>
+    <div class="plan">
+      ${ROOMS.slice(0,3).map(r=>room(r,'up')).join('')}
+      <div class="hall">
+        <div class="entrance ${MAPMSG?'warn':''}">${uni(MAPMSG?'confused':'')}<span>${hallMsg}</span></div>
+        <div class="path" aria-hidden="true"></div>
+        <span class="hall-sign up">▲ 1차시 · AI 알기</span>
+        <span class="hall-sign down">▼ 2차시 · AI 바르게 쓰기</span>
+        ${n===6?`<button class="btn green exit" data-go="finish">연구원증 만들기 →</button>`:`<button class="btn exit" id="gonext">${next.id}번 방 들어가기 →</button>`}
+      </div>
+      ${ROOMS.slice(3).map(r=>room(r,'dn')).join('')}
+    </div>
+  </section>`;
+  MAPSHAKE=0;
+  app.querySelectorAll('.proom').forEach(b=>b.onclick=()=>{const id=+b.dataset.id;
+    if(!unlocked(id)){SFX.bad();MAPSHAKE=id;MAPMSG=`${id}번 방은 아직 잠겨 있어요. ${id-1}번 ${ROOMS[id-2].name}을 먼저 통과해요!`;map();return;}
+    SFX.tap();go('s'+id);});
+  const g=document.getElementById('gonext'); if(g) g.onclick=()=>{SFX.tap();go('s'+next.id);};
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  on('rs',()=>{MAPRESET=true;map();});
+  on('rsN',()=>{MAPRESET=false;map();});
+  on('rsY',()=>{
+    const keepK=['name','school','klass','av','postId','sid','start'],kept={};keepK.forEach(k=>kept[k]=S[k]);
+    S=Object.assign(fresh(),kept);S.view='map';MAPRESET=false;MAPMSG='처음부터 다시 시작해요. 1번 원리의 방으로 가 볼까요?';
+    lastTyped='';save();renderRail();SFX.tap();map();
+  });
+  bindGo();
+}
+
+function roomCard(r){
+  return `<button class="room ${S.done[r.id]?'done':''}" data-id="${r.id}" data-room="${r.id}" aria-label="${r.id}번 ${r.name}${S.done[r.id]?' (배지 획득)':''}">
+    <div class="door"><span class="num">${r.id}</span><div class="big-ic">${ICON[r.ic]}</div></div>
+    ${S.done[r.id]?'<span class="sticker">배지<br>획득</span>':''}
+    <div class="plate"><span class="key">${r.key}</span><h3>${r.name}</h3><p>${r.desc}</p></div></button>`;
+}
+
+/* ---------- 단계 도우미 ---------- */
+function stepper(phases,cur,sub){
+  return `<div class="stepper" aria-label="진행 단계">${phases.map((p,i)=>`<span class="${i<cur?'d':i===cur?'c':''}"><i>${i<cur?'✓':i+1}</i>${p}</span>`).join('')}</div>${sub?`<p class="substep">${sub}</p>`:''}`;
+}
+function panel(title,inner,cls){return `<div class="mission step-in ${cls||''}"><h3>${title}</h3>${inner}</div>`;}
+function keep(fn){const y=scrollY;fn();scrollTo(0,y);}
+
+/* ---------- S1 원리 ---------- */
+const S1_TRAIN=[{e:'🍎',c:'빨강'},{e:'🍊',c:'주황'},{e:'🍊',c:'주황'},{e:'🍎',c:'빨강'},{e:'🍎',c:'빨강'},{e:'🍊',c:'주황'}];
+const S1_TEST=[{e:'🍎',c:'빨강',ans:'사과'},{e:'🍊',c:'주황',ans:'귤'},{e:'🍏',c:'초록',ans:'사과'}];
+function s1pred(t,L){
+  const same=S1_TRAIN.map((x,i)=>({x,l:L[i]})).filter(o=>o.x.c===t.c);
+  if(!same.length) return {p:null,why:`${t.c}색 예시는 한 번도 배운 적이 없어요.`};
+  const a=same.filter(o=>o.l==='사과').length,g=same.length-a;
+  if(a===g) return {p:null,why:`${t.c}색 예시가 사과 반, 귤 반이라 헷갈려요.`};
+  const p=a>g?'사과':'귤';
+  return {p,why:`${t.c}색 예시 ${same.length}개 중 ${Math.max(a,g)}개가 '${p}'였거든요.`};
+}
+function s1(){
+  const r=ROOMS[0], st=S.s1; st.labels=st.labels||{}; st.k=st.k||0; const k=st.k, L=st.labels;
+  const ok=S1_TRAIN.every((x,i)=>(x.e==='🍎'?'사과':'귤')===L[i]);
+  const phase=k<6?0:k===6?1:k<10?2:3;
+  let body='';
+  if(k<6){
+    const x=S1_TRAIN[k];
+    body=panel(`예시 ${k+1} · 이 과일의 이름은?`,`
+      <p class="lead">여러분이 붙여 준 이름표가 AI의 공부 자료(데이터)가 돼요.</p>
+      <div class="solo"><div class="em">${x.e}</div><div class="meta">${x.c}색 과일</div></div>
+      <div class="choice"><button class="btn" data-l="사과">사과</button><button class="btn" data-l="귤" style="--rc:#E0931A">귤</button></div>
+      ${k>0?`<div class="actions"><button class="btn alt sm" id="back">← 이전 예시</button></div>`:''}`);
+  } else if(k===6){
+    body=panel('AI에게 공부시키기',`
+      <p class="lead">여러분이 만든 데이터예요. 준비가 되면 AI를 학습시켜요.</p>
+      <div class="minis">${S1_TRAIN.map((x,i)=>`<div class="mini"><span>${x.e}</span><b>${L[i]||'?'}</b></div>`).join('')}</div>
+      <div class="actions"><button class="btn" id="train">AI 학습시키기</button><button class="btn alt" id="relabel">이름 다시 붙이기</button></div>`);
+  } else if(k<10){
+    const t=S1_TEST[k-7], o=s1pred(t,L), right=o.p===t.ans;
+    const shown=st['show'+k];
+    body=panel(`AI의 시험 ${k-6} / 3`,`
+      <p class="lead">AI가 처음 보는 사진이에요. AI는 뭐라고 대답할까요?</p>
+      <div class="solo"><div class="em">${t.e}</div><div class="meta">${t.c}색 · 처음 보는 사진</div>
+        ${shown?`<div class="pred ${o.p===null?'q':(right?'ok':'no')}">"${o.p||'잘 모르겠어요'}"</div><div class="meta">${o.why}</div>`:''}</div>
+      <div class="actions center">${shown?`<button class="btn" id="next">${k<9?'다음 시험':'결과 정리하기'}</button>`:`<button class="btn" id="reveal">AI의 대답 보기</button>`}</div>`,'chalk');
+  } else if(k===10){
+    body= ok?panel('발견! AI는 이렇게 배워요',`
+      <div class="note good"><div>사람이 "빨간 건 사과야"라는 규칙을 직접 알려 주지 않았어요. 그런데도 AI는 예시(데이터)에서 공통점을 찾아 스스로 규칙을 만들었어요. 이것을 <b>기계학습</b>이라고 해요.</div></div>
+      <div class="actions"><button class="btn" id="next">하나 더 알아보기</button></div>`)
+    :panel('어라, AI가 틀렸어요',`
+      <div class="note bad"><div>여러분이 붙인 이름표 중에 틀린 것이 있었어요. AI는 알려 준 그대로 배우기 때문에, 틀린 데이터를 배우면 틀린 답을 내요.</div></div>
+      <div class="actions"><button class="btn" id="redo">다시 가르치기</button></div>`);
+  } else {
+    body=panel('그런데 초록 사과는?',`
+      <div class="solo"><div class="em">🍏</div></div>
+      <div class="note"><div>AI는 초록 사과를 한 번도 본 적이 없어서 대답하지 못했어요. AI는 <b>배운 데이터 밖의 것에 약해요.</b> 다음 방에서 AI의 한계를 더 알아봐요.</div></div>`);
+  }
+  app.innerHTML=`${stageHead(r)}${stepper(['가르치기','학습','시험','발견'],phase,k<6?`예시 ${k+1} / 6`:k>6&&k<10?`시험 ${k-6} / 3`:'')}${body}${footNav(1)}`;
+  app.querySelectorAll('.choice button').forEach(b=>b.onclick=()=>{L[k]=b.dataset.l;st.k=k+1;SFX.tap();MSG=k===5?{t:'이름표가 다 붙었어요! 이제 저를 공부시켜 주세요.',m:'happy'}:{t:MSG?MSG.t:INTRO[1],m:''};save();s1();});
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  on('back',()=>{st.k=k-1;save();s1();});
+  on('relabel',()=>{st.k=0;save();s1();});
+  on('train',()=>trainAnim('유니가 공부하는 중',()=>{st.trained=true;st.k=7;['show7','show8','show9'].forEach(x=>delete st[x]);say('공부 끝! 처음 보는 사진도 맞혀 볼게요.','happy');save();s1();}));
+  on('reveal',()=>{st['show'+k]=true;const t=S1_TEST[k-7],o=s1pred(t,L);
+    if(o.p===t.ans){SFX.good();say('맞혔다! 예시에서 배운 대로 생각했어요.','happy');}
+    else if(o.p===null){SFX.bad();say('음… 이건 정말 모르겠어요.','confused');}
+    else{SFX.bad();say('제가 배운 대로 했는데… 틀렸나요?','confused');}
+    save();s1();});
+  on('next',()=>{st.k=k+1;SFX.tap();MSG=null;save();s1();if(st.k===11&&ok){award('s1',100);complete(1);}});
+  on('redo',()=>{st.labels={};st.k=0;MSG=null;save();s1();});
+  bindGo();
+}
+
+/* ---------- S2 한계 ---------- */
+const CN={하양:'흰',검정:'검은',갈색:'갈색',회색:'회색'};
+const COL={하양:'#FFFFFF',검정:'#2E2B2B',갈색:'#9B6A3E',회색:'#9AA0A8'};
+function pet(type,color){
+  const f=COL[color], s=color==='하양'?'#8A8A8A':'#222', eye=color==='검정'?'#F4D35E':'#222';
+  const ears=type==='cat'
+    ?`<path d="M14 30 L18 8 L32 22 Z" fill="${f}" stroke="${s}" stroke-width="2"/><path d="M66 30 L62 8 L48 22 Z" fill="${f}" stroke="${s}" stroke-width="2"/>`
+    :`<ellipse cx="14" cy="36" rx="9" ry="18" fill="${f}" stroke="${s}" stroke-width="2" transform="rotate(18 14 36)"/><ellipse cx="66" cy="36" rx="9" ry="18" fill="${f}" stroke="${s}" stroke-width="2" transform="rotate(-18 66 36)"/>`;
+  const nose=type==='cat'?`<path d="M37 47 L43 47 L40 51 Z" fill="#E88"/>`:`<ellipse cx="40" cy="50" rx="5" ry="4" fill="#222"/>`;
+  return `<svg viewBox="0 0 80 72" aria-hidden="true">${type==='cat'?'':ears}<circle cx="40" cy="40" r="26" fill="${f}" stroke="${s}" stroke-width="2"/>${type==='cat'?ears:''}<circle cx="31" cy="37" r="3.5" fill="${eye}"/><circle cx="49" cy="37" r="3.5" fill="${eye}"/>${nose}</svg>`;
+}
+const S2_BASE=[['cat','하양'],['cat','하양'],['cat','하양'],['cat','하양'],['cat','하양'],['dog','갈색'],['dog','갈색'],['dog','검정'],['dog','검정'],['dog','회색']];
+const S2_ADD=[['cat','검정'],['cat','갈색'],['cat','회색'],['dog','하양']];
+const S2_TEST=[['cat','하양'],['cat','검정'],['dog','하양']];
+function s2(){
+  const r=ROOMS[1], st=S.s2; st.k=st.k||0; const k=st.k;
+  const nm=t=>t==='cat'?'고양이':'강아지';
+  const petBox=(d,cls)=>`<div class="pet ${cls||''}">${pet(d[0],d[1])}${CN[d[1]]} ${nm(d[0])}</div>`;
+  const phase=[0,1,1,1,2,3,4,4,4,5,5][k];
+  let body='';
+  if(k===0){
+    body=panel('연구소의 공부 자료',`
+      <p class="lead">고양이와 강아지를 구별하는 AI를 만들 거예요. 공부 자료 10장을 잘 살펴보세요.</p>
+      <div class="pets">${S2_BASE.map(d=>petBox(d)).join('')}</div>
+      <div class="actions"><button class="btn" id="train">AI 학습시키기</button></div>`);
+  } else if(k<=3 || (k>=6&&k<=8)){
+    const byShape=k>=6, idx=byShape?k-6:k-1, [t,c]=S2_TEST[idx];
+    const p=byShape?t:(c==='하양'?'cat':'dog'), shown=st['show'+k];
+    body=panel(`${byShape?'다시 ':''}시험 ${idx+1} / 3`,`
+      <div class="aithink">${uni('')}<p><b>AI가 배운 규칙:</b> ${byShape?'"귀가 뾰족하면 고양이, 귀가 늘어지면 강아지."':'"하얀색이면 고양이, 다른 색이면 강아지."'}</p></div>
+      <div class="solo">${pet(t,c)}<div class="meta">정답: ${CN[c]} ${nm(t)}</div>
+        ${shown?`<div class="pred ${p===t?'ok':'no'}">"${nm(p)}!"</div>`:''}</div>
+      <div class="actions center">${shown?`<button class="btn" id="next">${idx<2?'다음 시험':'결과 정리하기'}</button>`:`<button class="btn" id="reveal">AI의 대답 보기</button>`}</div>`,'chalk');
+  } else if(k===4){
+    body=panel('왜 틀렸을까요?',`
+      <div class="note bad"><div>공부 자료에 <b>흰 고양이만</b> 있었어요. 그래서 AI는 "하얀색 = 고양이"라는 잘못된 규칙을 배웠어요. 이렇게 데이터가 한쪽으로 치우쳐서 생기는 문제를 <b>편향</b>이라고 해요.</div></div>
+      <div class="actions"><button class="btn green" id="add">다양한 사진 더 넣기</button></div>`);
+  } else if(k===5){
+    body=panel('새로 넣은 사진',`
+      <p class="lead">여러 색의 고양이와 흰 강아지 사진을 더했어요.</p>
+      <div class="pets">${S2_ADD.map(d=>petBox(d,'new')).join('')}</div>
+      <div class="actions"><button class="btn" id="train">다시 학습시키기</button></div>`);
+  } else if(k===9){
+    body=panel('해결!',`
+      <div class="note good"><div>여러 색의 고양이를 배우자 AI는 색깔 대신 <b>귀 모양</b>이라는 더 중요한 특징을 찾아냈어요. AI를 잘 가르치려면 <b>골고루, 다양한</b> 데이터가 필요해요.</div></div>
+      <div class="actions"><button class="btn" id="next">생각 나누기</button></div>`);
+  } else {
+    body=panel('짝과 이야기해 봐요',`
+      <p class="big-q">AI가 한쪽 나라 사람의 얼굴 사진으로만 공부한다면, 어떤 문제가 생길까요?</p>`);
+  }
+  app.innerHTML=`${stageHead(r)}${stepper(['데이터','시험','문제 발견','데이터 보충','다시 시험','정리'],phase)}${body}${footNav(2)}`;
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  on('train',()=>trainAnim('유니가 공부하는 중',()=>{st.trained=true;st.k=k===0?1:6;
+    say(k===0?'하얀 건 고양이, 나머지는 강아지! 완벽하죠?':'사진이 다양해지니 새로운 규칙이 보여요!','happy');save();s2();}));
+  on('reveal',()=>{st['show'+k]=true;const byShape=k>=6,[t,c]=S2_TEST[byShape?k-6:k-1],p=byShape?t:(c==='하양'?'cat':'dog');
+    if(p===t){SFX.good();say('맞혔어요!','happy');}else{SFX.bad();say('네? 틀렸다고요? 저는 배운 대로 했는데…','confused');}save();s2();});
+  on('next',()=>{st.k=k+1;SFX.tap();MSG=null;save();s2();if(st.k===9){award('s2',100);}if(st.k===10)complete(2);});
+  on('add',()=>{st.added=true;st.k=5;SFX.tap();say('사진이 늘었어요! 여러 색 고양이가 있네요.','');save();s2();});
+  bindGo();
+}
+
+/* ---------- S3 위험 ---------- */
+const S3=[
+ {q:'세종대왕은 어떤 일을 했어?',s:['세종대왕은 백성을 위해 훈민정음을 만들었어요.','측우기 같은 과학 기구를 만드는 일도 적극 도왔어요.','또 거북선을 직접 만들어 임진왜란에서 승리했어요.'],bad:2,why:'거북선으로 임진왜란(1592년)에서 활약한 사람은 이순신 장군이에요. 세종대왕이 살던 때보다 약 150년 뒤의 일이에요.'},
+ {q:'우리 몸의 뼈에 대해 알려 줘.',s:['어른의 몸에는 뼈가 약 206개 있어요.','아기는 뼈가 더 많은데, 자라면서 몇몇 뼈가 서로 붙어요.','우리 몸에서 가장 긴 뼈는 팔에 있는 위팔뼈예요.'],bad:2,why:'가장 긴 뼈는 허벅지에 있는 넙다리뼈(대퇴골)예요.'},
+ {q:'달은 어떻게 빛나?',s:['달은 약 한 달에 한 번 지구 둘레를 돌아요.','달은 스스로 밝은 빛을 내기 때문에 밤에 잘 보여요.','달에는 공기가 거의 없어요.'],bad:1,why:'달은 스스로 빛을 내지 못해요. 햇빛을 반사해서 밝게 보이는 거예요.'}
+];
+const RISKS=[['틀린 정보','그럴듯하게 틀린 말을 지어낼 수 있어요.'],['편향','치우친 데이터로 배우면 불공평한 답을 해요.'],['개인정보 유출','입력한 내 정보가 저장되거나 퍼질 수 있어요.'],['가짜 사진·영상','진짜처럼 보이는 딥페이크를 만들 수 있어요.']];
+function s3(){
+  const r=ROOMS[2], st=S.s3; st.k=st.k||0; const k=st.k;
+  let body;
+  if(k<3){
+    const c=S3[k], found=st['f'+k];
+    const tried=c.s.map((_,j)=>st['t'+k+'_'+j]);
+    body=panel(`AI 답변 ${k+1} / 3 · 틀린 문장 찾기`,`
+      <p class="lead">AI는 틀린 내용도 자신 있게 말할 때가 있어요(<b>할루시네이션</b>). 틀린 문장 하나를 찾아 눌러 보세요.</p>
+      <div class="chat"><div class="q">${esc(c.q)}</div>
+      <div class="a">${uni('')}<div class="bubble">
+        ${c.s.map((t,j)=>`<button class="sent ${found&&j===c.bad?'hit':''} ${tried[j]&&j!==c.bad?'fine':''}" data-j="${j}" ${found?'disabled':''}>${esc(t)}</button>`).join('')}
+      </div></div></div>
+      ${found?`<div class="note good"><div><b>찾았어요!</b> ${c.why}</div></div><div class="actions"><button class="btn" id="next">${k<2?'다음 답변':'위험요인 정리하기'}</button></div>`
+        :tried.some(Boolean)?`<div class="note"><div>초록색 문장은 맞는 내용이에요. 다른 문장을 살펴보세요.</div></div>`:''}`);
+  } else {
+    const n=k-3, R=RISKS[n];
+    body=panel(`AI의 위험요인 ${n+1} / 4`,`
+      <div class="risk-one"><b>${R[0]}</b><span>${R[1]}</span></div>
+      <div class="actions center">${n<3?`<button class="btn" id="next">다음 위험요인</button>`:''}</div>`,'chalk');
+  }
+  app.innerHTML=`${stageHead(r)}${stepper(['답변 1','답변 2','답변 3','위험요인'],Math.min(k,3))}${body}${footNav(3)}`;
+  app.querySelectorAll('.sent').forEach(b=>b.onclick=()=>{
+    const j=+b.dataset.j;
+    if(j===S3[k].bad){st['f'+k]=true;SFX.good();award('s3_'+k,30);say(['앗, 들켰다! 그럴듯하게 지어낸 말이었어요.','으악, 또 들켰어요! 눈이 정말 매서워요.','세 번 모두 찾아냈군요! 저도 틀릴 수 있으니 꼭 확인해 주세요.'][k],'happy');}
+    else{st['t'+k+'_'+j]=true;SFX.bad();say('후후, 그건 맞는 말이에요! 거짓말은 다른 곳에 있어요.','');}
+    save();keep(s3);});
+  const nx=document.getElementById('next');
+  if(nx) nx.onclick=()=>{st.k=k+1;SFX.tap();MSG=null;save();s3();if(st.k===6)complete(3);};
+  bindGo();
+}
+
+/* ---------- S4 비판적 수용 ---------- */
+const JUDGE=['믿을 만해요','확인이 필요해요','틀렸어요'];
+const S4=[
+ {t:'물은 보통 100℃에서 끓어요.',a:0,why:'과학 교과서에서 확인할 수 있는 사실이에요. (높은 산처럼 공기가 적은 곳에서는 더 낮은 온도에서 끓어요.)'},
+ {t:'고래는 바다에 사니까 물고기예요.',a:2,why:'고래는 새끼를 낳아 젖을 먹이고 폐로 숨을 쉬는 포유류예요.'},
+ {t:'내일 우리 동네에 하루 종일 비가 온대요.',a:1,why:'날씨는 계속 바뀌어요. AI의 정보가 오래된 것일 수 있으니 기상청 같은 믿을 수 있는 곳에서 최신 정보를 확인해야 해요.'},
+ {t:'우리 반에서 수학을 제일 잘하는 친구는 민준이에요.',a:1,why:'AI는 우리 반 친구들을 알 수 없어요. 근거 없이 지어낸 말일 수 있으니 그대로 믿으면 안 돼요.'},
+ {t:'우리나라의 수도는 서울이에요.',a:0,why:'사회 교과서나 지도에서 바로 확인할 수 있는 사실이에요. 믿을 수 있는 자료와 같은 내용이면 믿어도 좋아요.'}
+];
+function s4(){
+  const r=ROOMS[3], st=S.s4; st.k=st.k||0; const k=st.k;
+  let body;
+  if(k<5){
+    const c=S4[k], j=st['j'+k];
+    body=panel(`사건 ${k+1} / 5`,`
+      <div class="claim big"><div class="said">${uni('')}<p>"${esc(c.t)}"</p></div></div>
+      ${j===undefined?`
+        <p class="lead" style="text-align:center">이 말, 믿어도 될까요? 판정을 골라요.</p>
+        <div class="judge big">${JUDGE.map((g,q)=>`<button class="j${q}" data-q="${q}">${g}</button>`).join('')}</div>`
+      :`<div class="verdict">내 판정: <b class="j${j}">${JUDGE[j]}</b></div>
+        <div class="note ${j===c.a?'good':'bad'}"><div><b>${j===c.a?'좋은 판단이에요!':'탐정의 힌트'}</b> 알맞은 판정은 "${JUDGE[c.a]}"예요. ${c.why}</div></div>
+        <div class="actions"><button class="btn" id="next">${k<4?'다음 사건':'수사 결과 보기'}</button></div>`}`);
+  } else {
+    const right=S4.filter((c,i)=>st['j'+i]===c.a).length;
+    body=panel('수사 결과',`
+      <div class="solo"><div class="score">${right}<small> / 5</small></div><div class="meta">알맞은 판정</div></div>
+      <div class="note"><div>AI의 말을 그대로 받아들이지 않고 교과서, 백과사전, 어른에게 확인하는 태도를 <b>비판적 수용</b>이라고 해요.</div></div>`);
+  }
+  app.innerHTML=`${stageHead(r)}${stepper(['사건 1','사건 2','사건 3','사건 4','사건 5','결과'],k)}${body}${footNav(4)}`;
+  app.querySelectorAll('.judge button').forEach(b=>b.onclick=()=>{const q=+b.dataset.q;st['j'+k]=q;
+    if(q===S4[k].a){SFX.good();award('s4_'+k,20);say(['정확해요! 명탐정이시네요.','딩동댕! 바로 그거예요.','좋은 판단이에요. 확인하는 게 탐정의 기본!'][k%3],'happy');}
+    else{SFX.bad();say('음… 아래 힌트를 읽어 볼까요?','confused');}
+    save();keep(s4);});
+  const nx=document.getElementById('next'); if(nx) nx.onclick=()=>{st.k=k+1;SFX.tap();MSG=null;save();s4();if(st.k===5)complete(4);};
+  bindGo();
+}
+
+/* ---------- S5 안전 ---------- */
+const CAT={lock:'개인정보',face:'초상권·딥페이크',copy:'저작권',friends:'친구의 정보'};
+const CAT_RULE={lock:'나를 알아볼 수 있는 정보는 입력하지 않아요.',face:'허락 없이 얼굴을 쓰거나 바꾸지 않아요.',copy:'남의 작품을 내 것이라 하지 않고, AI 사용을 밝혀요.',friends:'친구의 이야기는 허락 없이 옮기지 않아요.'};
+const S5=[
+ {c:'lock',t:'AI 챗봇에게 내 이름, 학교, 집 주소를 알려 주었어요.',a:false,why:'이름, 주소, 전화번호, 학교처럼 나를 알아볼 수 있는 정보는 AI에 입력하지 않아요.'},
+ {c:'face',t:'친구 얼굴 사진을 AI로 바꿔 웃긴 영상을 만들고 단톡방에 올렸어요.',a:false,why:'허락 없이 다른 사람의 얼굴을 쓰거나 바꾸면 초상권 침해예요. 장난이라도 친구에게 큰 상처가 될 수 있어요.'},
+ {c:'copy',t:'인터넷 그림을 AI에 넣어 비슷하게 만든 뒤, 내가 그렸다고 대회에 냈어요.',a:false,why:'다른 사람의 작품을 바탕으로 만든 것을 내 것이라고 하면 저작권을 해치고 거짓말이 돼요.'},
+ {c:'lock',t:'AI에게 질문할 때 내 이름 대신 "초등학생"이라고만 썼어요.',a:true,why:'개인정보를 빼고 질문하는 좋은 습관이에요.'},
+ {c:'friends',t:'친구가 털어놓은 비밀 고민을 친구 이름과 함께 AI에게 적었어요.',a:false,why:'친구의 정보도 소중한 개인정보예요. 친구의 허락 없이 다른 곳에 옮기면 안 돼요.'},
+ {c:'copy',t:'발표 자료에 AI가 그린 그림을 넣고 "AI로 만든 그림"이라고 적었어요.',a:true,why:'AI로 만든 것을 솔직하게 밝히는 것이 책임 있는 표현이에요.'},
+ {c:'face',t:'유명인이 나오는 영상이 돈을 보내라고 해서, 어른께 먼저 알렸어요.',a:true,why:'AI로 만든 가짜 영상(딥페이크)일 수 있어요. 의심스러우면 믿을 수 있는 어른에게 알려요.'},
+ {c:'lock',t:'새 AI 앱을 쓰기 전에 부모님이나 선생님께 먼저 여쭤봤어요.',a:true,why:'AI 서비스마다 사용할 수 있는 나이와 규칙이 달라요. 어른과 함께 확인하면 더 안전해요.'}
+];
+function s5(){
+  const r=ROOMS[4], st=S.s5, i=st.i, last=st.ans.length>i?st.ans[i]:undefined;
+  const score=st.ans.filter((a,k)=>a===S5[k].a).length;
+  const keys=Object.keys(CAT);
+  let body;
+  if(i>=S5.length){
+    const n=st.sum||0;
+    if(n===0){
+      body=panel('안전 방패 완성!',`<div class="solo"><div class="score">${score}<small> / 8</small></div><div class="meta">바르게 판단한 상황</div></div>
+        <div class="actions center"><button class="btn" id="sumnext">방패 규칙 하나씩 보기</button><button class="btn alt" id="again">다시 하기</button></div>`);
+    } else {
+      const c=keys[n-1];
+      body=panel(`방패 규칙 ${n} / 4`,`<div class="risk-one"><b>${ICON[c]} ${CAT[c]}</b><span>${CAT_RULE[c]}</span></div>
+        <div class="actions center">${n<4?`<button class="btn" id="sumnext">다음 규칙</button>`:`<button class="btn alt" id="again">처음부터 다시 하기</button>`}</div>`,'chalk');
+    }
+  } else {
+    const c=S5[i];
+    body=panel(`상황 ${i+1} / ${S5.length}`,`
+    <div class="sit"><span class="tag">${ICON[c.c]} ${CAT[c.c]}</span>${(st.combo||0)>=2?`<span class="combo">${st.combo} 콤보</span>`:''}
+      <p class="big">${esc(c.t)}</p>
+      ${last===undefined?`<div class="ox"><button class="o" data-v="1" aria-label="안전해요 O">O</button><button class="x" data-v="0" aria-label="위험해요 X">X</button></div><p class="lead">안전한 행동이면 O, 위험한 행동이면 X</p>`
+      :`<div class="note ${last===c.a?'good':'bad'}" style="text-align:left;max-width:34em"><div><b>${last===c.a?'정답이에요!':'다시 생각해 봐요.'}</b> 이 행동은 ${c.a?'<b>안전해요(O)</b>':'<b>위험해요(X)</b>'}. ${c.why}</div></div>
+       <button class="btn" id="next">${i+1<S5.length?'다음 상황':'결과 보기'}</button>`}
+    </div>`);
+  }
+  const phase=i>=S5.length?1:0;
+  app.innerHTML=`${stageHead(r)}${stepper(['상황 판단','방패 규칙'],phase,i<S5.length?`<span class="prog inline"><i style="width:${(i/S5.length)*100}%"></i></span>`:'')}${body}${footNav(5)}`;
+  app.querySelectorAll('.ox button').forEach(b=>b.onclick=()=>{st.ans[i]=b.dataset.v==='1';const ok=st.ans[i]===S5[i].a;
+    if(ok){st.combo=(st.combo||0)+1;SFX.good();award('s5_'+i,15);if(st.combo>=3)award('s5c_'+i,10);
+      say(st.combo>=3?`${st.combo}연속 정답! 콤보 보너스 +10 XP!`:'정답! 방패가 더 튼튼해졌어요.','happy');}
+    else{st.combo=0;SFX.bad();say('앗, 방패에 금이 갔어요! 설명을 읽고 기억해 둬요.','confused');}
+    save();keep(s5);});
+  const nx=document.getElementById('next'); if(nx) nx.onclick=()=>{st.i++;st.sum=0;SFX.tap();MSG=null;save();s5();if(st.i>=S5.length)complete(5);};
+  const sn=document.getElementById('sumnext'); if(sn) sn.onclick=()=>{st.sum=(st.sum||0)+1;SFX.tap();save();s5();};
+  const ag=document.getElementById('again'); if(ag) ag.onclick=()=>{S.s5={i:0,ans:[],combo:0,sum:0};MSG=null;save();s5();};
+  bindGo();
+}
+
+/* ---------- S6 표현 ---------- */
+const AI_CHAT={q:'우리 동네 자랑 글에 넣을, 갯벌에 대한 문장 두 개만 써 줘.',a:['갯벌에는 짱뚱어와 칠게 같은 생물이 많이 산다.','갯벌은 바닷물을 깨끗하게 해 주는 중요한 곳이다.']};
+function expectedWho(t){t=t.trim();if(AI_CHAT.a.includes(t))return 'ai';if(DEFAULT_S6.some(d=>d.t===t))return 'me';return null;}
+function chatBox(hl){return `<div class="ai-log"><div class="log-h">AI와 나눈 대화</div><div class="chat"><div class="q">${esc(AI_CHAT.q)}</div>
+  <div class="a">${uni('')}<div class="bubble">${AI_CHAT.a.map(t=>`<span class="log-s ${hl===t?'hl':''}">${esc(t)}</span>`).join('')}</div></div></div></div>`;}
+const CHECKS=['AI가 쓴 문장이 맞는 내용인지 책이나 자료로 확인했나요?','AI가 만든 부분과 내가 만든 부분을 구분해서 표시했나요?','내 생각이나 경험을 담은 문장이 들어 있나요?'];
+function s6(){
+  const r=ROOMS[5], st=S.s6; st.k=st.k||0;
+  const lines=()=>st.lines.filter(l=>l.t.trim());
+  const LS=lines(), n=LS.length;
+  // 단계: 0 쓰기, 1..n 표시, n+1 미리보기, n+2..n+4 점검, n+5 게시
+  const k=Math.min(st.k,n+5);
+  const phase=k===0?0:k<=n?1:k===n+1?2:k<=n+4?3:4;
+  const credit=()=>{const a=LS.filter(l=>l.w==='ai').length;return `이 글은 모두 ${n}문장 중 ${a}문장을 AI(${esc(st.tool)})의 도움을 받아 썼습니다. AI가 도운 부분은 파란색, 내가 쓴 부분은 초록색으로 표시했습니다.`;};
+  const paper=()=>`<div class="preview"><h3>${esc(st.title||'제목 없음')}</h3><p>${LS.map(l=>`<span class="hl-${l.w}">${esc(l.t)}</span>`).join(' ')}</p>
+     <div class="legend"><span><span class="hl-me">초록</span> 내가 쓴 부분</span><span><span class="hl-ai">파랑</span> AI가 도운 부분</span></div>
+     <p class="credit"><b>AI 사용 밝히기</b> · ${credit()}</p></div>`;
+  let body;
+  if(k===0){
+    body=panel('1단계 · 글 쓰기',`
+      <p class="lead">글을 쓰다가 AI에게 도움을 받았어요. 아래는 AI와 나눈 대화예요.</p>
+      ${chatBox()}
+      <p class="lead">AI가 써 준 문장 두 개를 가져와서 아래 글을 완성했어요. 내 글로 바꿔 써도 좋아요. 다음 단계에서 문장마다 누가 썼는지 표시해요.</p>
+      <div class="two"><input id="t6" value="${esc(st.title)}" aria-label="글 제목" placeholder="글 제목">
+      <select id="tool6" aria-label="사용한 AI">${['챗GPT','클로드','제미나이','뤼튼','기타 AI'].map(x=>`<option ${x===st.tool?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div style="display:grid;gap:8px">${st.lines.map((l,i)=>`<div class="line"><span class="n">${i+1}</span><input id="l6_${i}" class="ltxt" data-i="${i}" value="${esc(l.t)}" aria-label="${i+1}번째 문장"><button class="x-del" data-del="${i}" aria-label="문장 지우기">×</button></div>`).join('')}</div>
+      <div class="actions"><button class="btn alt sm" id="addl">+ 문장 추가</button><button class="btn alt sm" id="reset6">예시 글로 되돌리기</button><span style="flex:1"></span><button class="btn" id="next" ${n?'':'disabled'}>표시하러 가기 →</button></div>`);
+  } else if(k<=n){
+    const l=LS[k-1];
+    body=panel(`2단계 · 문장 ${k} / ${n}`,`
+      <p class="lead">AI와 나눈 대화와 비교해 보세요. 이 문장은 누가 썼나요?</p>
+      ${chatBox(st.warn&&st.warn.k===k&&st.warn.e==='ai'?l.t.trim():null)}
+      <p class="sentence">"${esc(l.t)}"</p>
+      ${st.warn&&st.warn.k===k?`<div class="note bad"><div>${st.warn.e==='ai'?'이 문장은 AI 대답에 있던 문장이에요. 위 대화에서 노랗게 표시된 문장을 보세요.':'AI 대답에는 이 문장이 없어요. 내가 직접 쓴 문장이에요.'}</div></div>`:''}
+      <div class="choice"><button class="btn green" data-w="me">내가 썼어요</button><button class="btn" data-w="ai" style="--rc:#2F6FE0">AI가 도왔어요</button></div>
+      <div class="actions"><button class="btn alt sm" id="back">← 이전</button></div>`);
+  } else if(k===n+1){
+    body=panel('3단계 · 미리 보기',`${paper()}<div class="actions"><button class="btn alt sm" id="back">← 다시 표시하기</button><span style="flex:1"></span><button class="btn" id="next">점검하러 가기 →</button></div>`);
+  } else if(k<=n+4){
+    const c=k-n-2;
+    body=panel(`4단계 · 게시 전 점검 ${c+1} / 3`,`
+      <p class="sentence">${CHECKS[c]}</p>
+      <div class="choice"><button class="btn green" id="yes">네, 했어요</button><button class="btn alt" id="fix">아직이에요</button></div>
+      ${st.fix===c?`<div class="note bad"><div>${['AI가 쓴 문장을 교과서나 백과사전으로 확인하고 오세요. 틀린 내용이 있으면 1단계에서 고쳐요.','2단계로 돌아가 문장마다 누가 썼는지 표시해요.','1단계에서 내 경험이나 생각을 담은 문장을 한 줄 더 써 봐요.'][c]}</div></div>
+        <div class="actions"><button class="btn alt sm" id="goFix">${c===1?'2단계로 가기':'1단계로 가기'}</button></div>`:''}`);
+  } else {
+    body=panel('게시 완료!',`${paper()}<div class="note good"><div>AI의 도움을 받은 부분을 숨기지 않고 밝혔어요. 이것이 <b>책임 있는 표현</b>이에요.</div></div>`);
+  }
+  app.innerHTML=`${stageHead(r)}${stepper(['쓰기','표시하기','미리 보기','점검','게시'],phase)}${body}${footNav(6)}`;
+  const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+  const go6=v=>{st.k=v;st.fix=-1;st.warn=null;MSG=null;save();s6();};
+  if(k===0){
+    document.getElementById('t6').oninput=e=>{st.title=e.target.value;save();};
+    document.getElementById('tool6').onchange=e=>{st.tool=e.target.value;save();};
+    app.querySelectorAll('.ltxt').forEach(inp=>inp.oninput=()=>{st.lines[+inp.dataset.i].t=inp.value;save();const b=document.getElementById('next');if(b)b.disabled=!lines().length;});
+    app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{st.lines.splice(+b.dataset.del,1);save();keep(s6);});
+    on('addl',()=>{st.lines.push({t:'',w:'me'});save();keep(s6);setTimeout(()=>{const el=document.getElementById('l6_'+(st.lines.length-1));el&&el.focus();},0);});
+    on('reset6',()=>{st.lines=DEFAULT_S6.map(x=>({...x}));st.title='우리 동네 자랑하기';save();keep(s6);});
+    on('next',()=>{st.lines=lines();SFX.tap();go6(1);});
+  }
+  app.querySelectorAll('.choice button[data-w]').forEach(b=>b.onclick=()=>{const e=expectedWho(LS[k-1].t);
+    if(e&&b.dataset.w!==e){st.warn={k,e};SFX.bad();say(e==='ai'?'어? 그 문장은 제가 써 준 거예요! 대화를 다시 볼까요?':'그 문장은 제가 쓴 게 아니에요. 연구원님이 직접 쓴 문장이죠!','confused');save();keep(s6);return;}
+    st.warn=null;LS[k-1].w=b.dataset.w;SFX.good();go6(k+1);});
+  on('back',()=>go6(k-1));
+  if(k>0) on('next',()=>{SFX.tap();go6(k+1);});
+  on('yes',()=>{SFX.good();if(k===n+4){say('게시 완료! 솔직하게 밝혀 줘서 고마워요. 우리 멋진 팀이죠?','happy');st.k=k+1;st.fix=-1;save();award('s6',100);s6();complete(6);}else go6(k+1);});
+  on('fix',()=>{st.fix=k-n-2;SFX.bad();save();keep(s6);});
+  on('goFix',()=>go6(k-n-2===1?1:0));
+  bindGo();
+}
+
+/* ---------- CLAY AVATAR ---------- */
+const AV_OPT={
+  hair:[['short','짧은 머리'],['bob','단발'],['pony','묶은 머리'],['curly','곱슬']],
+  hc:[['black','검정'],['brown','갈색'],['gold','밝은 갈색']],
+  skin:[['s1','밝게'],['s2','중간'],['s3','진하게']],
+  shirt:[['blue','파랑'],['green','초록'],['yellow','노랑'],['purple','보라'],['red','빨강']],
+  face:[['smile','미소'],['grin','활짝'],['wink','윙크']]
+};
+const HC={black:['#6A5856','#2E2524','#150F0E'],brown:['#B07F55','#744a2a','#42270F'],gold:['#E7B872','#B27A36','#734A18']};
+const SK={s1:['#FFEBDD','#F8CFB0','#DDA37E'],s2:['#F8D8BA','#E9B48A','#C08556'],s3:['#E2B08A','#BF8458','#8C5731']};
+const SH={blue:['#6FA3F5','#2F63CF'],green:['#6FCB95','#26955A'],yellow:['#FFD86B','#E2A21A'],purple:['#B59CF0','#6F4FCB'],red:['#F58C7E','#D2453A']};
+function defAv(){return{hair:'short',hc:'black',skin:'s1',shirt:'blue',face:'smile'};}
+function avatarSVG(av,p){
+  av=Object.assign(defAv(),av||{});p=p||'a';
+  const h=HC[av.hc],k=SK[av.skin],c=SH[av.shirt];
+  const g=(id,a,b,d,cx,cy)=>`<radialGradient id="${p}${id}" cx="${cx||'38%'}" cy="${cy||'30%'}" r="75%"><stop offset="0" stop-color="${a}"/><stop offset=".6" stop-color="${b}"/><stop offset="1" stop-color="${d}"/></radialGradient>`;
+  const back={
+    bob:`<path d="M42 104 C36 48 70 30 100 30 C130 30 164 48 158 104 L160 150 C150 160 136 158 132 148 L132 96 L68 96 L68 148 C64 158 50 160 40 150 Z" fill="url(#${p}h)"/>`,
+    pony:`<ellipse cx="160" cy="70" rx="20" ry="30" fill="url(#${p}h)" transform="rotate(28 160 70)"/><circle cx="146" cy="58" r="8" fill="${c[1]}"/>`,
+    curly:'',short:''}[av.hair];
+  const front={
+    short:`<path d="M46 104 C40 56 70 34 100 34 C132 34 162 54 154 104 C150 86 140 74 126 70 C120 80 104 80 96 72 C84 82 64 82 58 76 C52 84 48 94 46 104 Z" fill="url(#${p}h)"/>`,
+    bob:`<path d="M48 98 C50 56 74 40 100 40 C126 40 150 56 152 98 C140 80 122 72 100 72 C92 80 70 84 48 98 Z" fill="url(#${p}h)"/>`,
+    pony:`<path d="M46 100 C42 56 70 36 100 36 C130 36 158 54 154 100 C144 80 128 70 106 68 C100 78 80 84 60 82 C54 88 48 94 46 100 Z" fill="url(#${p}h)"/>`,
+    curly:[[56,70,16],[74,52,17],[98,44,18],[122,50,17],[142,66,16],[150,88,12],[50,90,12],[86,62,12],[112,62,12]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#${p}h)"/>`).join('')
+  }[av.hair];
+  const eyeL=`<ellipse cx="81" cy="110" rx="6.5" ry="8" fill="#2A2020"/><circle cx="83.5" cy="106.5" r="2.4" fill="#fff"/>`;
+  const eyeR=av.face==='wink'?`<path d="M112 110 Q119 104 126 110" stroke="#2A2020" stroke-width="4" fill="none" stroke-linecap="round"/>`:`<ellipse cx="119" cy="110" rx="6.5" ry="8" fill="#2A2020"/><circle cx="121.5" cy="106.5" r="2.4" fill="#fff"/>`;
+  const mouth=av.face==='grin'?`<path d="M86 128 Q100 148 114 128 Z" fill="#8E3B3B"/><path d="M92 136 Q100 142 108 136 Q100 132 92 136 Z" fill="#F08A8A"/>`
+    :`<path d="M89 128 Q100 138 111 128" stroke="#8E3B3B" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  return `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="클레이 연구원 사진">
+  <defs>${g('k',k[0],k[1],k[2])}${g('h',h[0],h[1],h[2],'35%','25%')}${g('ck','#FFFFFF','#EEF2F7','#C9D1DC','40%','20%')}${g('sh',c[0],c[0],c[1],'45%','20%')}
+    <filter id="${p}sd" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#1b2a44" flood-opacity=".28"/></filter>
+    <filter id="${p}bl"><feGaussianBlur stdDeviation="4"/></filter></defs>
+  <g filter="url(#${p}sd)">
+    <path d="M26 222 C30 178 58 160 100 160 C142 160 170 178 174 222 Z" fill="url(#${p}ck)"/>
+    <path d="M82 162 L100 200 L118 162 Z" fill="url(#${p}sh)"/>
+    <path d="M78 160 L96 196 L84 206 L70 170 Z" fill="#F7F9FC" stroke="#D5DCE6" stroke-width="1.5"/>
+    <path d="M122 160 L104 196 L116 206 L130 170 Z" fill="#F7F9FC" stroke="#D5DCE6" stroke-width="1.5"/>
+    <rect x="130" y="186" width="24" height="18" rx="4" fill="#E4EAF2"/><rect x="136" y="178" width="4" height="16" rx="2" fill="#2F6FE0"/><rect x="143" y="180" width="4" height="14" rx="2" fill="#E0533F"/>
+    <rect x="88" y="138" width="24" height="28" rx="10" fill="${k[2]}"/>
+    ${back}
+    <circle cx="48" cy="112" r="11" fill="url(#${p}k)"/><circle cx="152" cy="112" r="11" fill="url(#${p}k)"/>
+    <circle cx="100" cy="104" r="54" fill="url(#${p}k)"/>
+    <ellipse cx="82" cy="78" rx="22" ry="12" fill="#fff" opacity=".35" filter="url(#${p}bl)"/>
+    ${front}
+    <ellipse cx="70" cy="126" rx="10" ry="6" fill="#FF8C8C" opacity=".45"/><ellipse cx="130" cy="126" rx="10" ry="6" fill="#FF8C8C" opacity=".45"/>
+    ${eyeL}${eyeR}${mouth}
+  </g></svg>`;
+}
+function hash(s){let h=2166136261;for(const ch of String(s))h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0;}
+function idNo(){return 'AI-2026-'+String(hash((S.name||'')+(S.school||'')+(S.postId||'')) % 10000).padStart(4,'0');}
+function barcode(seed){let h=hash(seed),x=0,out='';while(x<196){h=Math.imul(h^(h>>>13),1597334677)>>>0;const w=1+(h%3),gap=1+((h>>>4)%3);out+=`<rect x="${x}" y="0" width="${w}" height="34" fill="#1f2433"/>`;x+=w+gap;}return `<svg viewBox="0 0 200 34" preserveAspectRatio="none" aria-hidden="true">${out}</svg>`;}
+function today(d){d=d?new Date(d):new Date();return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
+
+/* 연구원증 카드 (내 것 / 게시판 것 공용) */
+function idCard(d,p){
+  const n=d.badges.filter(Boolean).length, full=n===6;
+  return `<article class="idcard ${full?'full':'temp'}">
+    <div class="idc-hole" aria-hidden="true"></div>
+    <header class="idc-top"><div class="orb mini-orb"></div><div><b>AI 탐험 연구소</b><small>AI EXPLORATION LAB</small></div><span class="idc-type">${full?'정식 연구원':'견습 연구원'}</span></header>
+    <div class="idc-body">
+      <div class="idc-photo">${avatarSVG(d.av,p)}<span class="holo" aria-hidden="true"></span></div>
+      <div class="idc-name">${esc(d.name)||'이름 없음'}</div>
+      <div class="idc-rank">${esc(d.level)} · ${d.xp} XP</div>
+      <dl class="idc-info">
+        <div><dt>소속</dt><dd>${esc(d.school)||'-'}</dd></div>
+        <div><dt>학년·반</dt><dd>${esc(d.klass)||'-'}</dd></div>
+        <div><dt>연구원 번호</dt><dd class="mono">${esc(d.idno)}</dd></div>
+        <div><dt>발급일</dt><dd class="mono">${esc(d.date)}</dd></div>
+      </dl>
+      <div class="idc-badges" aria-label="배지 ${n}/6">${ROOMS.map((r,i)=>`<span class="${d.badges[i]?'on':''}" title="${r.key}">${d.badges[i]?ICON.medal:''}<em>${['원리','한계','위험','비판','안전','표현'][i]}</em></span>`).join('')}</div>
+      ${d.pledge?`<p class="idc-pledge">"${esc(d.pledge)}"</p>`:''}
+    </div>
+    <footer class="idc-foot"><div class="bc">${barcode(d.idno)}<span class="mono">${esc(d.idno)}</span></div>
+      ${full?`<div class="stamp" aria-label="연구소장 직인"><span>AI탐험<br>연구소장</span></div>`:`<div class="stamp off"><span>배지<br>${n}/6</span></div>`}</footer>
+  </article>`;
+}
+function myCardData(){
+  return {name:S.name||'',school:S.school||'',klass:S.klass||'',pledge:S.pledge||'',av:Object.assign(defAv(),S.av||{}),
+    level:lvInfo().name,xp:S.xp||0,badges:ROOMS.map(r=>!!S.done[r.id]),idno:idNo(),date:today()};
+}
+
+/* ---------- FINISH (연구원증 만들기) ---------- */
+function finish(){
+  S.av=Object.assign(defAv(),S.av||{});
+  const n=doneCount();
+  const chips=(key)=>AV_OPT[key].map(([v,l])=>`<button class="chip ${S.av[key]===v?'sel':''}" data-k="${key}" data-v="${v}">${key==='hc'?`<i style="background:${HC[v][1]}"></i>`:key==='skin'?`<i style="background:${SK[v][1]}"></i>`:key==='shirt'?`<i style="background:${SH[v][1]}"></i>`:''}${l}</button>`).join('');
+  app.innerHTML=`
+  <section class="stage-banner" style="--rc:#B97D40"><div class="stage-h"><div class="ic">${ICON.medal}</div><div><small>탐험 완료 · 배지 ${n}/6</small><h2>나의 연구원증</h2></div></div></section>
+  <div class="id-wrap">
+    <div class="lanyard-col"><div class="lanyard" aria-hidden="true"><span>AI 탐험 연구소 · AI 탐험 연구소 · AI 탐험 연구소</span></div><div class="clip" aria-hidden="true"></div><div id="mycard">${idCard(myCardData(),'me')}</div></div>
+    <div class="mission id-edit">
+      <h3>연구원증 꾸미기</h3>
+      <div class="fields">
+        <label for="nm2">이름</label><input id="nm2" value="${esc(S.name)}" placeholder="연구원 이름" maxlength="12">
+        <label for="sc2">학교</label><input id="sc2" value="${esc(S.school||'')}" placeholder="○○초등학교" maxlength="20">
+        <label for="kl2">학년·반</label><input id="kl2" value="${esc(S.klass||'')}" placeholder="4학년 2반" maxlength="12">
+        <label for="pl">나의 약속</label><input id="pl" value="${esc(S.pledge)}" placeholder="AI가 알려 준 내용은 꼭 한 번 더 확인할게요." maxlength="50">
+      </div>
+      <div class="avpick">
+        <p class="lab">사진 꾸미기</p>
+        <div class="row"><span>머리</span><div>${chips('hair')}</div></div>
+        <div class="row"><span>머리색</span><div>${chips('hc')}</div></div>
+        <div class="row"><span>피부</span><div>${chips('skin')}</div></div>
+        <div class="row"><span>옷</span><div>${chips('shirt')}</div></div>
+        <div class="row"><span>표정</span><div>${chips('face')}</div></div>
+      </div>
+      ${n<6?`<div class="note"><div>배지 6개를 모두 모으면 <b>정식 연구원증</b>이 되고 연구소장 직인이 찍혀요.<br>지금은 견습 연구원증이에요.</div></div>`:''}
+      <div class="actions"><button class="btn green" id="post">게시판에 올리기</button><button class="btn alt" data-go="board">게시판 보기</button></div>
+      <p class="lead" id="postmsg">${S.postId?'이미 올린 연구원증이 있어요. 다시 올리면 새 내용으로 바뀌어요.':''}</p>
+    </div>
+  </div>
+  <div class="foot-nav"><button class="btn alt" data-go="map">← 연구소 지도</button><button class="btn alt" data-go="teacher">선생님 보기 →</button></div>`;
+  const redraw=()=>{document.getElementById('mycard').innerHTML=idCard(myCardData(),'me');};
+  [['nm2','name'],['sc2','school'],['kl2','klass'],['pl','pledge']].forEach(([id,key])=>{const el=document.getElementById(id);el.oninput=()=>{S[key]=el.value.trim();save();redraw();};});
+  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{S.av[b.dataset.k]=b.dataset.v;save();SFX.tap();
+    app.querySelectorAll(`.chip[data-k="${b.dataset.k}"]`).forEach(x=>x.classList.toggle('sel',x===b));redraw();});
+  document.getElementById('post').onclick=postCard;
+  bindGo();
+}
+
+/* ---------- 게시판 (공유 db) ---------- */
+let DBP=null, BOARD=[], BOARD_ST='loading', UNSUB=null, CAN_ADMIN=false;
+function getDb(){if(!DBP) DBP=(window.claude&&claude.use?claude.use('db'):Promise.resolve(null)).catch(()=>null);return DBP;}
+let BOARD_STARTING=false;
+async function startBoard(){
+  if(UNSUB||BOARD_STARTING||BOARD_ST==='off') return;BOARD_STARTING=true;
+  const db=await getDb();
+  if(!db){BOARD_ST='off';BOARD_STARTING=false;if(S.view==='board')board();return;}
+  try{const u=await claude.use('user');CAN_ADMIN=u?await u.canEdit():false;}catch(e){}
+  UNSUB=db.collection('board').orderBy('at','desc').limit(300).onSnapshot(snap=>{
+    BOARD=snap.docs.map(d=>({id:d.id,...d.data()}));BOARD_ST='ok';if(S.view==='board')keep(board);
+  },err=>{BOARD_ST='err';UNSUB=null;BOARD_STARTING=false;if(S.view==='board')board();});
+}
+async function postCard(){
+  const msg=document.getElementById('postmsg'), btn=document.getElementById('post');
+  if(!S.name){msg.textContent='이름을 먼저 적어 주세요.';document.getElementById('nm2').focus();return;}
+  btn.disabled=true;msg.textContent='올리는 중…';
+  const db=await getDb();
+  if(!db){msg.textContent='지금 이 화면에서는 게시판을 쓸 수 없어요. 선생님이 공유한 링크로 로그인해서 열어 주세요.';btn.disabled=false;return;}
+  try{
+    if(!S.postId){S.postId='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);save();}
+    const d=myCardData();
+    await db.collection('board').doc(S.postId).set({...d,at:Date.now()});
+    SFX.badge();confetti();toast('게시판에 올렸어요!');
+    go('board');
+  }catch(e){
+    btn.disabled=false;
+    msg.textContent=e&&e.code==='invalid_argument'?'게시판에 올릴 권한이 없어요. 선생님께 이 링크를 "참여자(Contributor)"로 공유해 달라고 말씀드려요.'
+      :e&&e.code==='quota_exceeded'?'게시판이 가득 찼어요. 선생님께 말씀드려요.':'올리지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.';
+  }
+}
+function board(){
+  startBoard();
+  const mine=S.postId;
+  let inner;
+  if(BOARD_ST==='loading') inner=`<p class="lead center-t">게시판을 불러오는 중…</p>`;
+  else if(BOARD_ST==='off') inner=`<div class="note"><div>지금 이 화면에서는 게시판을 볼 수 없어요.<br>선생님이 공유한 링크로 로그인해서 열어 주세요.</div></div>`;
+  else if(BOARD_ST==='err') inner=`<div class="note bad"><div>게시판 연결이 끊겼어요.<br>페이지를 새로 고쳐 주세요.</div></div>`;
+  else if(!BOARD.length) inner=`<div class="note"><div>아직 올라온 연구원증이 없어요.<br>첫 번째 연구원이 되어 보세요!</div></div>`;
+  else inner=`<div class="board-grid">${BOARD.map((d,i)=>`<div class="pin ${d.id===mine?'mine':''}" style="--r:${((hash(d.id)%7)-3)*.8}deg">
+      <span class="tack" aria-hidden="true"></span>${d.id===mine?'<span class="me-tag">내 연구원증</span>':''}
+      ${idCard({...d,badges:Array.isArray(d.badges)?d.badges:[],xp:+d.xp||0},'b'+i)}
+      ${CAN_ADMIN?`<button class="btn alt sm del" data-del="${esc(d.id)}">내리기</button>`:''}</div>`).join('')}</div>`;
+  app.innerHTML=`
+  <section class="stage-banner" style="--rc:#2F6FE0"><div class="stage-h"><div class="ic">${ICON.book}</div><div><small>우리 반 연구원들</small><h2>연구원증 게시판</h2></div></div></section>
+  <div class="corkboard">
+    <div class="cork-h"><b>모두 ${BOARD.length}명</b><span>정식 연구원 ${BOARD.filter(d=>Array.isArray(d.badges)&&d.badges.filter(Boolean).length===6).length}명</span></div>
+    ${inner}
+  </div>
+  <div class="foot-nav"><button class="btn alt" data-go="finish">← 내 연구원증</button><button class="btn alt" data-go="map">연구소 지도</button></div>`;
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.del;b.outerHTML=`<span class="delq">정말 내릴까요? <button class="btn sm" data-yes="${esc(id)}" style="--rc:#D2453A">내리기</button> <button class="btn alt sm" data-no>취소</button></span>`;
+    app.querySelector(`[data-yes="${CSS.escape(id)}"]`).onclick=async()=>{const db=await getDb();try{await db.collection('board').doc(id).delete();if(id===S.postId){S.postId='';save();}toast('내렸어요');}catch(e){toast('내리지 못했어요');}};
+    app.querySelector('[data-no]').onclick=()=>keep(board);
+  });
+  bindGo();
+}
+
+/* ---------- 진행 기록 동기화 (태블릿 → 공유 db) ---------- */
+let SYNC_T=null, LAST_SENT='';
+function progressRecord(){
+  return {sid:S.sid,name:S.name||'',school:S.school||'',klass:S.klass||'',xp:S.xp||0,level:lvInfo().name,
+    done:ROOMS.map(r=>!!S.done[r.id]),view:S.view||'home',
+    s1ok:!!S.done[1],s2fixed:!!S.s2.added,s3found:S3.filter((_,i)=>S.s3['f'+i]).length,
+    s4:S4.map((_,i)=>S.s4['j'+i]===undefined?-1:S.s4['j'+i]),
+    s5:S5.map((c,i)=>S.s5.ans[i]===undefined?-1:(S.s5.ans[i]===c.a?1:0)),
+    s6ai:(S.s6.k>1)?(S.s6.lines||[]).filter(l=>l.t.trim()&&l.w==='ai').length:0,s6n:(S.s6.k>1)?(S.s6.lines||[]).filter(l=>l.t.trim()).length:0,
+    posted:!!S.postId,pledge:S.pledge||'',start:S.start||Date.now()};
+}
+function scheduleSync(){
+  if(!S.sid){S.sid='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);S.start=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+  clearTimeout(SYNC_T);SYNC_T=setTimeout(syncNow,1500);
+}
+async function syncNow(){
+  if(!(S.name||S.xp>0||doneCount()>0))return;
+  const rec=progressRecord(),key=JSON.stringify(rec);if(key===LAST_SENT)return;
+  const db=await getDb();if(!db)return;
+  try{await db.collection('progress').doc(S.sid).set({...rec,at:Date.now()});LAST_SENT=key;}catch(e){}
+}
+
+/* ---------- 선생님 전체 현황판 ---------- */
+let PROG=[], PROG_ST='loading', PUNSUB=null, DASH={today:true,sort:'name',open:''};
+let PROG_STARTING=false;
+async function startProg(){
+  if(PUNSUB||PROG_STARTING||PROG_ST==='off')return;PROG_STARTING=true;
+  const db=await getDb();
+  if(!db){PROG_ST='off';PROG_STARTING=false;if(S.view==='dash')dash();return;}
+  try{const u=await claude.use('user');CAN_ADMIN=u?await u.canEdit():false;}catch(e){}
+  PUNSUB=db.collection('progress').orderBy('at','desc').limit(500).onSnapshot(snap=>{
+    PROG=snap.docs.map(d=>({id:d.id,...d.data()}));PROG_ST='ok';if(S.view==='dash')keep(dash);
+  },()=>{PROG_ST='err';PUNSUB=null;PROG_STARTING=false;if(S.view==='dash')dash();});
+}
+function ago(t){const m=Math.round((Date.now()-t)/60000);return m<1?'방금':m<60?m+'분 전':m<1440?Math.round(m/60)+'시간 전':Math.round(m/1440)+'일 전';}
+function whereIs(v){const m=/^s(\d)$/.exec(v||'');return m?ROOMS[m[1]-1].name:{home:'첫 화면',map:'연구소 지도',finish:'연구원증',board:'게시판',teacher:'선생님 보기',dash:'현황판'}[v]||'-';}
+function dash(){
+  startProg();
+  const t0=new Date();t0.setHours(0,0,0,0);
+  let rows=PROG.filter(r=>!DASH.today||(r.at||0)>=t0.getTime());
+  const nb=r=>(r.done||[]).filter(Boolean).length;
+  const s4c=r=>(r.s4||[]).filter((v,i)=>v===S4[i].a).length, s5c=r=>(r.s5||[]).filter(v=>v===1).length;
+  rows=[...rows].sort(DASH.sort==='name'?(a,b)=>(a.klass||'').localeCompare(b.klass||'')||(a.name||'').localeCompare(b.name||'','ko'):DASH.sort==='xp'?(a,b)=>(b.xp||0)-(a.xp||0):(a,b)=>nb(a)-nb(b));
+  const N=rows.length, full=rows.filter(r=>nb(r)===6).length, avg=N?Math.round(rows.reduce((s,r)=>s+(r.xp||0),0)/N):0, posted=rows.filter(r=>r.posted).length;
+  const live=rows.filter(r=>Date.now()-(r.at||0)<3*60000).length;
+  // 문항 분석
+  const items=[...S4.map((c,i)=>({room:'탐정단',t:c.t,ans:JUDGE[c.a],n:rows.filter(r=>r.s4&&r.s4[i]>=0).length,ok:rows.filter(r=>r.s4&&r.s4[i]===c.a).length})),
+               ...S5.map((c,i)=>({room:'안전 방패',t:c.t,ans:c.a?'O':'X',n:rows.filter(r=>r.s5&&r.s5[i]>=0).length,ok:rows.filter(r=>r.s5&&r.s5[i]===1).length}))]
+    .filter(x=>x.n>0).map(x=>({...x,p:Math.round(x.ok/x.n*100)})).sort((a,b)=>a.p-b.p);
+  const hard=items.slice(0,4);
+  let body;
+  if(PROG_ST==='loading') body=`<p class="lead center-t">현황을 불러오는 중…</p>`;
+  else if(PROG_ST==='off') body=`<div class="note"><div>이 화면에서는 현황판을 쓸 수 없어요.<br>Claude에 로그인한 상태로 연구소 링크를 열어 주세요.</div></div>`;
+  else if(PROG_ST==='err') body=`<div class="note bad"><div>현황판 연결이 끊겼어요.<br>페이지를 새로 고쳐 주세요.</div></div>`;
+  else if(!N) body=`<div class="note"><div>${DASH.today?'오늘':'아직'} 들어온 학생 기록이 없어요.<br>학생이 이름을 적거나 방을 시작하면 여기에 바로 나타나요.</div></div>`;
+  else body=`
+  <div class="tiles">
+    <div class="tile2"><b>${N}</b><span>참여 학생</span><small>${live}명 지금 활동 중</small></div>
+    <div class="tile2"><b>${full}</b><span>정식 연구원</span><small>배지 6개 모두</small></div>
+    <div class="tile2"><b>${avg}</b><span>평균 XP</span><small>최고 ${Math.max(...rows.map(r=>r.xp||0))} XP</small></div>
+    <div class="tile2"><b>${posted}</b><span>게시판에 올림</span><small>${N-posted}명 아직</small></div>
+  </div>
+  <div class="dash-2">
+    <div class="mission"><h3>방별 통과 현황</h3>
+      <div class="rbar">${ROOMS.map((r,i)=>{const c=rows.filter(x=>x.done&&x.done[i]).length,p=Math.round(c/N*100);
+        return `<div class="rb" data-room="${r.id}"><span>${r.id}. ${r.name}</span><div class="bar"><i style="width:${p}%"></i></div><b>${c}/${N}</b></div>`;}).join('')}</div>
+    </div>
+    <div class="mission"><h3>어려워한 문제</h3>
+      ${hard.length?`<ol class="hard">${hard.map(x=>`<li><span class="pct ${x.p<50?'low':x.p<75?'mid':''}">${x.p}%</span><div><small>${x.room} · 정답 ${esc(x.ans)} · ${x.n}명 응답</small><p>${esc(x.t)}</p></div></li>`).join('')}</ol>`:'<p class="lead">아직 푼 문제가 없어요.</p>'}
+    </div>
+  </div>
+  <div class="mission"><h3>학생별 기록</h3>
+    <div class="tbl-wrap"><table class="dtable">
+      <thead><tr><th>이름</th><th>학년·반</th><th>배지</th><th>XP</th><th>탐정단</th><th>안전</th><th>표현</th><th>게시</th><th>지금 위치</th><th>최근 활동</th></tr></thead>
+      <tbody>${rows.map(r=>{const open=DASH.open===r.id;return `
+        <tr class="drow ${open?'open':''}" data-id="${esc(r.id)}" tabindex="0">
+          <td><b>${esc(r.name)||'<span class="muted">(이름 없음)</span>'}</b></td><td>${esc(r.klass)||'-'}</td>
+          <td><span class="dots">${ROOMS.map((_,i)=>`<i class="${r.done&&r.done[i]?'on':''}"></i>`).join('')}</span></td>
+          <td class="num">${r.xp||0}</td><td class="num">${s4c(r)}/5</td><td class="num">${s5c(r)}/8</td>
+          <td class="num">${r.s6n?`AI ${r.s6ai}/${r.s6n}`:'-'}</td><td>${r.posted?'<span class="pill y">올림</span>':'<span class="pill n">-</span>'}</td>
+          <td>${whereIs(r.view)}</td><td class="${Date.now()-(r.at||0)<180000?'live':''}">${ago(r.at||0)}</td></tr>
+        ${open?`<tr class="ddetail"><td colspan="10">
+          <div class="det">
+            <div><b>탐정단 판정</b><ul>${S4.map((c,i)=>{const v=r.s4?r.s4[i]:-1;return `<li class="${v<0?'':v===c.a?'ok':'no'}">${esc(c.t)} → ${v<0?'미응답':JUDGE[v]}</li>`;}).join('')}</ul></div>
+            <div><b>안전 방패</b><ul>${S5.map((c,i)=>{const v=r.s5?r.s5[i]:-1;return `<li class="${v<0?'':v===1?'ok':'no'}">${esc(c.t)} → ${v<0?'미응답':v===1?'맞음':'틀림'}</li>`;}).join('')}</ul></div>
+            <div><b>그 밖의 기록</b><ul><li>원리의 방: ${r.s1ok?'AI를 바르게 가르침':'진행 중'}</li><li>한계의 방: ${r.s2fixed?'다양한 데이터로 편향을 해결함':'진행 중'}</li><li>위험의 방: 틀린 문장 ${r.s3found||0}/3개 찾음</li><li>나의 약속: ${esc(r.pledge)||'-'}</li><li>소속: ${esc(r.school)||'-'}</li></ul></div>
+          </div></td></tr>`:''}`;}).join('')}</tbody></table></div>
+    <p class="lead">줄을 누르면 학생의 문항별 답을 볼 수 있어요.</p>
+  </div>`;
+  app.innerHTML=`
+  <section class="stage-banner" style="--rc:#23304A"><div class="stage-h"><div class="ic">${ICON.lens}</div><div><small>선생님 전용</small><h2>전체 현황판</h2></div></div></section>
+  <div class="dash-bar">
+    <div class="seg2" role="group" aria-label="기간"><button class="${DASH.today?'sel':''}" data-f="today">오늘</button><button class="${DASH.today?'':'sel'}" data-f="all">전체 기간</button></div>
+    <label class="srt">정렬 <select id="srt"><option value="name" ${DASH.sort==='name'?'selected':''}>학년·반, 이름</option><option value="xp" ${DASH.sort==='xp'?'selected':''}>XP 높은 순</option><option value="slow" ${DASH.sort==='slow'?'selected':''}>도움이 필요한 순</option></select></label>
+    <span style="flex:1"></span>
+    <button class="btn alt sm" id="csv">표 복사 (엑셀용)</button>
+    <button class="btn alt sm" data-go="teacher">이 태블릿 기록</button>
+  </div>
+  <p class="lead" id="dmsg"></p>
+  ${body}
+  ${CAN_ADMIN&&PROG.length?`<div class="mission"><h3>기록 정리</h3><p class="lead">수업이 끝나면 현황판 기록을 모두 지울 수 있어요. 지우기 전에 '표 복사'로 저장해 두세요.</p><div class="actions" id="clrBox"><button class="btn alt" id="clr">현황판 기록 모두 지우기</button></div></div>`:''}
+  <div class="foot-nav"><button class="btn alt" data-go="map">← 연구소 지도</button><button class="btn alt" data-go="board">게시판 →</button></div>`;
+  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{DASH.today=b.dataset.f==='today';keep(dash);});
+  document.getElementById('srt').onchange=e=>{DASH.sort=e.target.value;keep(dash);};
+  app.querySelectorAll('.drow').forEach(tr=>{const f=()=>{DASH.open=DASH.open===tr.dataset.id?'':tr.dataset.id;keep(dash);};tr.onclick=f;tr.onkeydown=e=>{if(e.key==='Enter')f();};});
+  document.getElementById('csv').onclick=()=>{
+    const head=['이름','학교','학년·반','배지',...ROOMS.map(r=>r.key),'XP','등급','탐정단(/5)','안전(/8)','위험 문장(/3)','표현 AI문장','게시','약속','최근 활동'];
+    const lines=[head.join('\t'),...rows.map(r=>[r.name,r.school,r.klass,nb(r),...ROOMS.map((_,i)=>r.done&&r.done[i]?'O':''),r.xp||0,r.level,s4c(r),s5c(r),r.s3found||0,r.s6n?`${r.s6ai}/${r.s6n}`:'',r.posted?'O':'',r.pledge,new Date(r.at||0).toLocaleString('ko-KR')].map(v=>String(v??'').replace(/\s+/g,' ')).join('\t'))];
+    const txt=lines.join('\n'),msg=document.getElementById('dmsg');
+    try{navigator.clipboard.writeText(txt).then(()=>msg.textContent='복사했어요. 엑셀이나 한셀에 붙여 넣으세요.',()=>msg.textContent='복사하지 못했어요. 다시 눌러 주세요.');}catch(e){msg.textContent='복사하지 못했어요.';}
+  };
+  const clr=document.getElementById('clr');
+  if(clr) clr.onclick=()=>{document.getElementById('clrBox').innerHTML=`<span>${PROG.length}명의 기록을 모두 지울까요?</span><button class="btn sm" style="--rc:#D2453A" id="clrY">네, 지워요</button><button class="btn alt sm" id="clrN">취소</button>`;
+    document.getElementById('clrN').onclick=()=>keep(dash);
+    document.getElementById('clrY').onclick=async()=>{const db=await getDb();let n=0;for(const r of PROG){try{await db.collection('progress').doc(r.id).delete();n++;}catch(e){}}toast(n+'명의 기록을 지웠어요');};};
+  bindGo();
+}
+
+/* ---------- TEACHER ---------- */
+function summary(){
+  const s4r=S4.filter((c,i)=>S.s4['j'+i]===c.a).length;
+  const s5r=S.s5.ans.filter((a,k)=>a===S5[k].a).length;
+  const L=S.s6.lines.filter(l=>l.t.trim());
+  const out=[
+   `[AI 탐험 연구소 결과] ${S.name||'(이름 없음)'}`,
+   `등급 ${lvInfo().name} (${S.xp||0} XP)`,
+   `배지 ${doneCount()}/6: ${ROOMS.map(r=>`${r.key}${S.done[r.id]?'○':'×'}`).join(' ')}`,
+   `탐정단 판정: ${S4.filter((_,i)=>S.s4['j'+i]!==undefined).length}/5 응답, 알맞은 판정 ${s4r}개`,
+   ...S4.map((c,i)=>`  - "${c.t}" → ${JUDGE[S.s4['j'+i]]??'미응답'}${S.s4['j'+i]===c.a?' (알맞음)':''}`),
+   `안전 방패: ${S.s5.ans.length}/8 응답, 정답 ${s5r}개`,
+   `표현 게시판: 「${S.s6.title}」 ${L.length}문장 중 AI 도움 ${L.filter(l=>l.w==='ai').length}문장 (${S.s6.tool})`,
+   `나의 약속: ${S.pledge||'(미작성)'}`
+  ];
+  return out.join('\n');
+}
+function teacher(){
+  const s4r=S4.filter((c,i)=>S.s4['j'+i]===c.a).length;
+  const s5r=S.s5.ans.filter((a,k)=>a===S5[k].a).length;
+  app.innerHTML=`
+  <div class="stage-h"><div class="ic">${ICON.lens}</div><div><small>선생님 보기</small><h2>${esc(S.name)||'이 기기의 연구원'} 활동 기록</h2></div></div>
+  <div class="mission">
+    <p class="lead">이 기기에서 한 활동만 보여요. 학생마다 태블릿 한 대를 쓰면, 마지막에 '결과 복사'로 모아서 평어 작성 자료로 쓸 수 있어요.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>방</th><th>상태</th><th>기록</th></tr></thead>
+      <tbody>
+      ${ROOMS.map(r=>{let rec='';
+        if(r.id===4) rec=`판정 ${S4.filter((_,i)=>S.s4['j'+i]!==undefined).length}/5, 알맞은 판정 ${s4r}개`;
+        if(r.id===5) rec=`응답 ${S.s5.ans.length}/8, 정답 ${s5r}개`;
+        if(r.id===6) rec=`「${esc(S.s6.title)}」 AI 도움 ${S.s6.lines.filter(l=>l.t.trim()&&l.w==='ai').length}문장`;
+        if(r.id===1) rec=S.s1.trained?'AI 학습 완료':'';
+        if(r.id===2) rec=S.s2.added?'다양한 데이터 추가함':'';
+        if(r.id===3) rec=`틀린 문장 ${S3.filter((_,i)=>S.s3['f'+i]).length}/3 찾음`;
+        return `<tr><td>${r.id}. ${r.name}</td><td><span class="pill ${S.done[r.id]?'y':'n'}">${S.done[r.id]?'완료':'진행 전'}</span></td><td>${rec}</td></tr>`;}).join('')}
+      </tbody></table></div>
+    <h3>탐정단 본부 · 판정 기록</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>AI의 말</th><th>학생 판정</th><th>알맞은 판정</th></tr></thead><tbody>
+      ${S4.map((c,i)=>`<tr><td>${esc(c.t)}</td><td>${S.s4['j'+i]!==undefined?JUDGE[S.s4['j'+i]]+(S.s4['j'+i]===c.a?' ✓':''):'-'}</td><td>${JUDGE[c.a]}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p><b>나의 약속</b> · ${esc(S.pledge)||'-'}</p>
+    <textarea id="sum" rows="7" readonly aria-label="결과 요약">${esc(summary())}</textarea>
+    <div class="actions">
+      <button class="btn" id="copy">결과 복사</button>
+      <span class="lead" id="cmsg"></span>
+    </div>
+  </div>
+  <div class="mission"><h3>다음 학생 준비</h3>
+    <p class="lead">이 기기의 기록을 지우고 새 연구원으로 시작해요. 지우기 전에 결과를 복사해 두세요.</p>
+    <div class="actions" id="resetBox"><button class="btn alt" id="reset">기록 지우기</button></div>
+  </div>
+  <div class="foot-nav"><button class="btn alt" data-go="dash">← 전체 현황판</button><button class="btn alt" data-go="map">연구소 지도</button></div>`;
+  document.getElementById('copy').onclick=()=>{
+    const ta=document.getElementById('sum'), msg=document.getElementById('cmsg');
+    const fallback=()=>{ta.focus();ta.select();msg.textContent='텍스트를 선택했어요. Ctrl+C로 복사하세요.';};
+    try{navigator.clipboard.writeText(ta.value).then(()=>msg.textContent='복사했어요.',fallback);}catch(e){fallback();}
+  };
+  document.getElementById('reset').onclick=()=>{
+    document.getElementById('resetBox').innerHTML=`<span>정말 지울까요?</span><button class="btn" style="background:var(--warn);box-shadow:none" id="yes">네, 지워요</button><button class="btn alt" id="no">취소</button>`;
+    document.getElementById('yes').onclick=()=>{S=fresh();save();renderRail();go('home');};
+    document.getElementById('no').onclick=teacher;
+  };
+  bindGo();
+}
+
+function render(){
+  let v=S.view; let m=/^s(\d)$/.exec(v);
+  if(m&&!unlocked(+m[1])){const id=+m[1];MAPMSG=`${id}번 방은 아직 잠겨 있어요. ${id-1}번 ${ROOMS[id-2].name}을 먼저 통과해요!`;MAPSHAKE=id;SFX.bad();v=S.view='map';m=null;}
+  if(v!=='map'){MAPMSG=null;MAPRESET=false;}
+  app.dataset.room=m?m[1]:'';
+  ({home,map,s1,s2,s3,s4,s5,s6,finish,board,teacher,dash}[v]||home)();document.body.dataset.view=v;
+}
+
+/* ---- 문장마다 줄 나누기 ---- */
+function splitLines(){
+  app.querySelectorAll('.note > div, .lead, .risk-one span, .credit, .aithink p, .solo .meta, .pledge').forEach(el=>{
+    if(el.dataset.split||el.querySelector('input,button,select,textarea'))return;
+    let h=el.innerHTML;
+    h=h.replace(/^(\s*<b>[^<]*[.!?]<\/b>)\s*/,'$1<br>');
+    h=h.replace(/([.!?]["”)]?)\s+(?![^<]*>)(?=\S)/g,'$1<br>');
+    el.innerHTML=h; el.dataset.split='1';
+  });
+}
+new MutationObserver(splitLines).observe(app,{childList:true});
+
+/* ---- 화면 크기 인식 · 자동 맞춤 ---- */
+function fitScreen(){
+  const w=innerWidth,h=innerHeight,de=document.documentElement;
+  const touch=matchMedia('(pointer:coarse)').matches;
+  let cls, z=1;
+  if(w<600) cls='phone';
+  else if(w<1100||(touch&&w<1400)) cls='tablet';
+  else if(w<1700) cls='pc';
+  else cls='board';
+  if(cls==='board') z=Math.max(1,Math.min(w/1280,h/800,3));
+  else if(cls==='pc' && h>900 && w>1400) z=Math.min(w/1280,h/800,1.3);
+  de.dataset.screen=cls; de.dataset.touch=touch?'1':'0'; de.dataset.orient=h>w?'portrait':'landscape';
+  document.body.style.zoom=z===1?'':String(z);
+  const tp=document.querySelector('.top');de.style.setProperty('--topH',(tp?tp.offsetHeight:78)+'px');
+  de.style.setProperty('--appH',(h/z)+'px'); de.style.setProperty('--vh1',(h/z/100)+'px'); de.style.setProperty('--vw1',(w/z/100)+'px');
+}
+let FIT_T=null;
+addEventListener('resize',()=>{clearTimeout(FIT_T);FIT_T=setTimeout(fitScreen,120);});
+addEventListener('orientationchange',()=>setTimeout(fitScreen,200));
+fitScreen();
+(function(){const b=document.getElementById('fs');if(!b)return;
+  const upd=()=>{b.setAttribute('aria-label',document.fullscreenElement?'전체 화면 끝내기':'전체 화면');};
+  b.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(e){toast('이 화면에서는 전체 화면을 쓸 수 없어요');}};
+  document.addEventListener('fullscreenchange',()=>{upd();fitScreen();});})();
+renderRail(); render();
+})();
+</script>
+
+</html>
