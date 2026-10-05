@@ -1,5 +1,4 @@
-<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>AI 탐험 연구소</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Fredoka:wght@600&family=Noto+Sans+KR:wght@500;700;800&display=swap">
@@ -786,6 +785,24 @@ html[data-screen="phone"] .lockv{grid-auto-flow:column;grid-template-columns:aut
 html[data-screen="phone"] .lockv .lk{grid-row:1/span 2;width:44px;height:44px}
 html[data-screen="phone"] .lockv b,html[data-screen="phone"] .lockv small{justify-self:start;text-align:left}
 html[data-screen="phone"] .plan-tools{justify-content:flex-start}
+
+/* ---- QR ---- */
+.qrov{z-index:45}
+.qrbox{background:var(--surface);border:6px solid #B98247;border-radius:28px;padding:22px 26px;display:grid;gap:12px;justify-items:center;box-shadow:0 10px 0 #7E4F22,0 20px 40px rgba(0,0,0,.3);max-width:min(560px,100%);width:100%;max-height:calc(var(--appH,100dvh) - 24px);overflow:auto}
+.qrhead{display:flex;gap:12px;align-items:center;justify-self:stretch}
+.qrhead .orb{width:48px;height:48px;flex:none}.qrhead .orb::after{font-size:16px}
+.qrhead small{color:var(--wood);font-size:14px}.qrhead h3{font-size:26px}
+.qrlink{display:block;width:min(400px,72vw,calc(var(--appH,100dvh) - 330px));min-width:200px;aspect-ratio:1;background:#fff;border-radius:18px;padding:10px;box-shadow:0 0 0 4px #2F6FE0,0 8px 0 #1B3E8F;transition:transform .15s}
+.qrlink:hover{transform:scale(1.02)}
+.qrsvg{width:100%;height:100%;display:block}
+.qrurl{font-family:"Fredoka",var(--body);font-size:16px;color:var(--muted);user-select:all;overflow-wrap:anywhere;text-align:center}
+.qrbox .actions .btn{text-decoration:none;display:inline-flex;align-items:center}
+.qrbtn{font-family:"Fredoka",var(--body);font-weight:600}
+.qrmini{display:flex;gap:12px;align-items:center;border:0;background:#EEF4FF;border-radius:14px;padding:8px 12px;text-align:left;color:#2E2A24;font-size:14px;line-height:1.4;box-shadow:0 3px 0 #C9D6EA}
+.qrmini b{font-size:15px;color:#2458C8}
+.qrthumb{width:52px;height:52px;flex:none;background:#fff;border-radius:8px;padding:3px}
+.qrthumb .qrsvg{width:100%;height:100%}
+html[data-screen="board"] .qrlink{width:min(460px,calc(var(--appH,100dvh) - 330px))}
 </style>
 
 <header class="top">
@@ -794,8 +811,8 @@ html[data-screen="phone"] .plan-tools{justify-content:flex-start}
     <div class="rail" id="rail" aria-label="모은 배지"></div>
     <span class="xp" id="xp"></span>
     <button class="tbtn snd" id="snd" aria-label="소리 켜고 끄기"></button>
+    <button class="tbtn qrbtn" id="goQR" aria-label="입장 QR 코드 크게 보기">QR</button>
     <button class="tbtn" id="goMap">지도</button>
-    <button class="tbtn" id="goBoard">게시판</button>
     <button class="tbtn" id="goTeacher">선생님 현황판</button>
     <button class="tbtn fsbtn" id="fs" aria-label="전체 화면" title="전체 화면"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
   </div>
@@ -974,7 +991,7 @@ const app=document.getElementById('app');
 function go(v){S.view=v;MSG=null;save();render();window.scrollTo({top:0,behavior:'smooth'});}
 document.getElementById('goHome').onclick=()=>go('home');
 document.getElementById('goTeacher').onclick=()=>go('dash');
-document.getElementById('goBoard').onclick=()=>go('board');
+
 document.getElementById('goMap').onclick=()=>go('map');
 
 function renderSnd(){document.getElementById('snd').textContent=SND?'소리 켬':'소리 끔';}
@@ -994,7 +1011,7 @@ function footNav(id){
   const next=id<6?(S.done[id]?`<button class="btn" data-go="s${id+1}">${ROOMS[id].name} →</button>`:`<button class="btn alt locked-btn" data-go="s${id+1}">${ICON.lock} ${ROOMS[id].name}</button>`):`<button class="btn ${S.done[id]?'':'alt'}" data-go="finish">연구원증 받기 →</button>`;
   return `<div class="foot-nav">${prev}${next}</div>`;
 }
-function bindGo(){app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));app.querySelectorAll('[data-badge]').forEach(b=>b.onclick=()=>badgeModal(+b.dataset.badge));}
+function bindGo(){app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=qrModal);app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));app.querySelectorAll('[data-badge]').forEach(b=>b.onclick=()=>badgeModal(+b.dataset.badge));}
 
 /* ---------- HOME ---------- */
 function home(){
@@ -1012,6 +1029,7 @@ function home(){
       <div><h2 style="font-size:24px">연구원님, AI의 비밀을 풀어 봐요!</h2><p>여섯 개의 방을 탐험하며 AI가 배우는 원리와 한계, 위험요인을 알아보고 AI를 바르고 안전하게 쓰는 법을 익혀요. 방을 통과할 때마다 배지를 받아요.</p></div>
       <div class="note-paper">
         <div class="namebox"><input id="nm" placeholder="연구원 이름을 적어요" value="${esc(S.name)}" aria-label="연구원 이름"><button class="btn" id="start">${ICON.map} 연구소 지도</button></div>
+        <button class="qrmini" data-qr="1" aria-label="입장 QR 코드 크게 보기"><span class="qrthumb">${QR_SVG}</span><span><b>친구들도 들어와요!</b><br>눌러서 QR 크게 보기</span></button>
         ${(()=>{const l=lvInfo();return `<div class="lvl"><div class="row"><b>${l.name} · 배지 ${n}/6</b><span>${S.xp||0} XP${l.next?` · 다음 등급까지 ${l.next[0]-(S.xp||0)}`:' · 최고 등급!'}</span></div><div class="prog"><i style="width:${l.pct}%;background:var(--gold)"></i></div></div>`})()}
       </div>
     </div>
@@ -1524,8 +1542,7 @@ function finish(){
         <div class="row"><span>표정</span><div>${chips('face')}</div></div>
       </div>
       ${n<6?`<div class="note"><div>배지 6개를 모두 모으면 <b>정식 연구원증</b>이 되고 연구소장 직인이 찍혀요.<br>지금은 견습 연구원증이에요.</div></div>`:''}
-      <div class="actions"><button class="btn green" id="post">게시판에 올리기</button><button class="btn alt" data-go="board">게시판 보기</button></div>
-      <p class="lead" id="postmsg">${S.postId?'이미 올린 연구원증이 있어요. 다시 올리면 새 내용으로 바뀌어요.':''}</p>
+      <div class="actions"><button class="btn green" data-go="map">연구소 지도로 돌아가기</button></div>
     </div>
   </div>
   <div class="foot-nav"><button class="btn alt" data-go="map">← 연구소 지도</button><button class="btn alt" data-go="teacher">선생님 보기 →</button></div>`;
@@ -1533,7 +1550,6 @@ function finish(){
   [['nm2','name'],['sc2','school'],['kl2','klass'],['pl','pledge']].forEach(([id,key])=>{const el=document.getElementById(id);el.oninput=()=>{S[key]=el.value.trim();save();redraw();};});
   app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{S.av[b.dataset.k]=b.dataset.v;save();SFX.tap();
     app.querySelectorAll(`.chip[data-k="${b.dataset.k}"]`).forEach(x=>x.classList.toggle('sel',x===b));redraw();});
-  document.getElementById('post').onclick=postCard;
   bindGo();
 }
 
@@ -1655,7 +1671,7 @@ function dash(){
     <div class="tile2"><b>${N}</b><span>참여 학생</span><small>${live}명 지금 활동 중</small></div>
     <div class="tile2"><b>${full}</b><span>정식 연구원</span><small>배지 6개 모두</small></div>
     <div class="tile2"><b>${avg}</b><span>평균 XP</span><small>최고 ${Math.max(...rows.map(r=>r.xp||0))} XP</small></div>
-    <div class="tile2"><b>${posted}</b><span>게시판에 올림</span><small>${N-posted}명 아직</small></div>
+    <div class="tile2"><b>${N?(rows.reduce((a,r)=>a+nb(r),0)/N).toFixed(1):0}</b><span>평균 배지</span><small>6개 중</small></div>
   </div>
   <div class="dash-2">
     <div class="mission"><h3>방별 통과 현황</h3>
@@ -1668,15 +1684,15 @@ function dash(){
   </div>
   <div class="mission"><h3>학생별 기록</h3>
     <div class="tbl-wrap"><table class="dtable">
-      <thead><tr><th>이름</th><th>학년·반</th><th>배지</th><th>XP</th><th>탐정단</th><th>안전</th><th>표현</th><th>게시</th><th>지금 위치</th><th>최근 활동</th></tr></thead>
+      <thead><tr><th>이름</th><th>학년·반</th><th>배지</th><th>XP</th><th>탐정단</th><th>안전</th><th>표현</th><th>지금 위치</th><th>최근 활동</th></tr></thead>
       <tbody>${rows.map(r=>{const open=DASH.open===r.id;return `
         <tr class="drow ${open?'open':''}" data-id="${esc(r.id)}" tabindex="0">
           <td><b>${esc(r.name)||'<span class="muted">(이름 없음)</span>'}</b></td><td>${esc(r.klass)||'-'}</td>
           <td><span class="dots">${ROOMS.map((_,i)=>`<i class="${r.done&&r.done[i]?'on':''}"></i>`).join('')}</span></td>
           <td class="num">${r.xp||0}</td><td class="num">${s4c(r)}/5</td><td class="num">${s5c(r)}/8</td>
-          <td class="num">${r.s6n?`AI ${r.s6ai}/${r.s6n}`:'-'}</td><td>${r.posted?'<span class="pill y">올림</span>':'<span class="pill n">-</span>'}</td>
+          <td class="num">${r.s6n?`AI ${r.s6ai}/${r.s6n}`:'-'}</td>
           <td>${whereIs(r.view)}</td><td class="${Date.now()-(r.at||0)<180000?'live':''}">${ago(r.at||0)}</td></tr>
-        ${open?`<tr class="ddetail"><td colspan="10">
+        ${open?`<tr class="ddetail"><td colspan="9">
           <div class="det">
             <div><b>탐정단 판정</b><ul>${S4.map((c,i)=>{const v=r.s4?r.s4[i]:-1;return `<li class="${v<0?'':v===c.a?'ok':'no'}">${esc(c.t)} → ${v<0?'미응답':JUDGE[v]}</li>`;}).join('')}</ul></div>
             <div><b>안전 방패</b><ul>${S5.map((c,i)=>{const v=r.s5?r.s5[i]:-1;return `<li class="${v<0?'':v===1?'ok':'no'}">${esc(c.t)} → ${v<0?'미응답':v===1?'맞음':'틀림'}</li>`;}).join('')}</ul></div>
@@ -1696,13 +1712,13 @@ function dash(){
   <p class="lead" id="dmsg"></p>
   ${body}
   ${CAN_ADMIN&&PROG.length?`<div class="mission"><h3>기록 정리</h3><p class="lead">수업이 끝나면 현황판 기록을 모두 지울 수 있어요. 지우기 전에 '표 복사'로 저장해 두세요.</p><div class="actions" id="clrBox"><button class="btn alt" id="clr">현황판 기록 모두 지우기</button></div></div>`:''}
-  <div class="foot-nav"><button class="btn alt" data-go="map">← 연구소 지도</button><button class="btn alt" data-go="board">게시판 →</button></div>`;
+  <div class="foot-nav"><button class="btn alt" data-go="map">← 연구소 지도</button><button class="btn alt" data-go="teacher">이 태블릿 기록 →</button></div>`;
   app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{DASH.today=b.dataset.f==='today';keep(dash);});
   document.getElementById('srt').onchange=e=>{DASH.sort=e.target.value;keep(dash);};
   app.querySelectorAll('.drow').forEach(tr=>{const f=()=>{DASH.open=DASH.open===tr.dataset.id?'':tr.dataset.id;keep(dash);};tr.onclick=f;tr.onkeydown=e=>{if(e.key==='Enter')f();};});
   document.getElementById('csv').onclick=()=>{
-    const head=['이름','학교','학년·반','배지',...ROOMS.map(r=>r.key),'XP','등급','탐정단(/5)','안전(/8)','위험 문장(/3)','표현 AI문장','게시','약속','최근 활동'];
-    const lines=[head.join('\t'),...rows.map(r=>[r.name,r.school,r.klass,nb(r),...ROOMS.map((_,i)=>r.done&&r.done[i]?'O':''),r.xp||0,r.level,s4c(r),s5c(r),r.s3found||0,r.s6n?`${r.s6ai}/${r.s6n}`:'',r.posted?'O':'',r.pledge,new Date(r.at||0).toLocaleString('ko-KR')].map(v=>String(v??'').replace(/\s+/g,' ')).join('\t'))];
+    const head=['이름','학교','학년·반','배지',...ROOMS.map(r=>r.key),'XP','등급','탐정단(/5)','안전(/8)','위험 문장(/3)','표현 AI문장','약속','최근 활동'];
+    const lines=[head.join('\t'),...rows.map(r=>[r.name,r.school,r.klass,nb(r),...ROOMS.map((_,i)=>r.done&&r.done[i]?'O':''),r.xp||0,r.level,s4c(r),s5c(r),r.s3found||0,r.s6n?`${r.s6ai}/${r.s6n}`:'',r.pledge,new Date(r.at||0).toLocaleString('ko-KR')].map(v=>String(v??'').replace(/\s+/g,' ')).join('\t'))];
     const txt=lines.join('\n'),msg=document.getElementById('dmsg');
     try{navigator.clipboard.writeText(txt).then(()=>msg.textContent='복사했어요. 엑셀이나 한셀에 붙여 넣으세요.',()=>msg.textContent='복사하지 못했어요. 다시 눌러 주세요.');}catch(e){msg.textContent='복사하지 못했어요.';}
   };
@@ -1783,7 +1799,7 @@ function render(){
   if(m&&!unlocked(+m[1])){const id=+m[1];MAPMSG=`${id}번 방은 아직 잠겨 있어요. ${id-1}번 ${ROOMS[id-2].name}을 먼저 통과해요!`;MAPSHAKE=id;SFX.bad();v=S.view='map';m=null;}
   if(v!=='map'){MAPMSG=null;MAPRESET=false;}
   app.dataset.room=m?m[1]:'';
-  ({home,map,s1,s2,s3,s4,s5,s6,finish,board,teacher,dash}[v]||home)();document.body.dataset.view=v;
+  ({home,map,s1,s2,s3,s4,s5,s6,finish,teacher,dash}[v]||home)();document.body.dataset.view=v;
 }
 
 /* ---- 문장마다 줄 나누기 ---- */
@@ -1822,8 +1838,28 @@ fitScreen();
   const upd=()=>{b.setAttribute('aria-label',document.fullscreenElement?'전체 화면 끝내기':'전체 화면');};
   b.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(e){toast('이 화면에서는 전체 화면을 쓸 수 없어요');}};
   document.addEventListener('fullscreenchange',()=>{upd();fitScreen();});})();
+
+/* ---- 입장 QR ---- */
+const LAB_URL='https://claude.ai/artifact/YBU56Lzattc3iBwMB8osdn';
+const QR_SVG=`<svg class="qrsvg" viewBox="0 0 37 37" shape-rendering="crispEdges" role="img" aria-label="연구소 입장 QR 코드"><rect width="37" height="37" fill="#fff"/><path d="M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 2h1v1h-1zM7 2h1v1h-1zM8 2h1v1h-1zM11 2h1v1h-1zM13 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM17 2h1v1h-1zM18 2h1v1h-1zM20 2h1v1h-1zM21 2h1v1h-1zM22 2h1v1h-1zM25 2h1v1h-1zM28 2h1v1h-1zM29 2h1v1h-1zM30 2h1v1h-1zM31 2h1v1h-1zM32 2h1v1h-1zM33 2h1v1h-1zM34 2h1v1h-1zM2 3h1v1h-1zM8 3h1v1h-1zM11 3h1v1h-1zM12 3h1v1h-1zM17 3h1v1h-1zM20 3h1v1h-1zM23 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM13 4h1v1h-1zM16 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM17 5h1v1h-1zM20 5h1v1h-1zM24 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM31 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM16 6h1v1h-1zM17 6h1v1h-1zM18 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM16 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM23 7h1v1h-1zM24 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM29 8h1v1h-1zM30 8h1v1h-1zM31 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM16 9h1v1h-1zM18 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM25 9h1v1h-1zM26 9h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM14 10h1v1h-1zM15 10h1v1h-1zM19 10h1v1h-1zM21 10h1v1h-1zM22 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM29 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM2 11h1v1h-1zM5 11h1v1h-1zM6 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM13 11h1v1h-1zM15 11h1v1h-1zM16 11h1v1h-1zM17 11h1v1h-1zM18 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM21 11h1v1h-1zM22 11h1v1h-1zM25 11h1v1h-1zM28 11h1v1h-1zM29 11h1v1h-1zM31 11h1v1h-1zM32 11h1v1h-1zM33 11h1v1h-1zM34 11h1v1h-1zM4 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM18 12h1v1h-1zM19 12h1v1h-1zM24 12h1v1h-1zM30 12h1v1h-1zM32 12h1v1h-1zM33 12h1v1h-1zM2 13h1v1h-1zM6 13h1v1h-1zM10 13h1v1h-1zM11 13h1v1h-1zM12 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM17 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM27 13h1v1h-1zM28 13h1v1h-1zM30 13h1v1h-1zM31 13h1v1h-1zM32 13h1v1h-1zM2 14h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM16 14h1v1h-1zM18 14h1v1h-1zM22 14h1v1h-1zM24 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM30 14h1v1h-1zM31 14h1v1h-1zM33 14h1v1h-1zM34 14h1v1h-1zM6 15h1v1h-1zM7 15h1v1h-1zM10 15h1v1h-1zM14 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM20 15h1v1h-1zM24 15h1v1h-1zM28 15h1v1h-1zM29 15h1v1h-1zM33 15h1v1h-1zM34 15h1v1h-1zM3 16h1v1h-1zM5 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM10 16h1v1h-1zM13 16h1v1h-1zM15 16h1v1h-1zM17 16h1v1h-1zM18 16h1v1h-1zM19 16h1v1h-1zM22 16h1v1h-1zM24 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM30 16h1v1h-1zM33 16h1v1h-1zM5 17h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM20 17h1v1h-1zM23 17h1v1h-1zM27 17h1v1h-1zM28 17h1v1h-1zM29 17h1v1h-1zM31 17h1v1h-1zM32 17h1v1h-1zM2 18h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM7 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM18 18h1v1h-1zM19 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM34 18h1v1h-1zM2 19h1v1h-1zM4 19h1v1h-1zM6 19h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM25 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM2 20h1v1h-1zM3 20h1v1h-1zM5 20h1v1h-1zM7 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM18 20h1v1h-1zM20 20h1v1h-1zM22 20h1v1h-1zM28 20h1v1h-1zM29 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM4 21h1v1h-1zM5 21h1v1h-1zM6 21h1v1h-1zM9 21h1v1h-1zM10 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM16 21h1v1h-1zM18 21h1v1h-1zM23 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM29 21h1v1h-1zM30 21h1v1h-1zM31 21h1v1h-1zM32 21h1v1h-1zM34 21h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM16 22h1v1h-1zM20 22h1v1h-1zM24 22h1v1h-1zM26 22h1v1h-1zM27 22h1v1h-1zM29 22h1v1h-1zM30 22h1v1h-1zM31 22h1v1h-1zM33 22h1v1h-1zM2 23h1v1h-1zM3 23h1v1h-1zM5 23h1v1h-1zM6 23h1v1h-1zM7 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM13 23h1v1h-1zM17 23h1v1h-1zM18 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM32 23h1v1h-1zM34 23h1v1h-1zM2 24h1v1h-1zM4 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM11 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM23 24h1v1h-1zM29 24h1v1h-1zM31 24h1v1h-1zM32 24h1v1h-1zM33 24h1v1h-1zM2 25h1v1h-1zM5 25h1v1h-1zM6 25h1v1h-1zM7 25h1v1h-1zM10 25h1v1h-1zM14 25h1v1h-1zM15 25h1v1h-1zM18 25h1v1h-1zM21 25h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM25 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM31 25h1v1h-1zM32 25h1v1h-1zM33 25h1v1h-1zM2 26h1v1h-1zM4 26h1v1h-1zM5 26h1v1h-1zM8 26h1v1h-1zM11 26h1v1h-1zM14 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM24 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM28 26h1v1h-1zM29 26h1v1h-1zM30 26h1v1h-1zM31 26h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM15 27h1v1h-1zM19 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM26 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM33 27h1v1h-1zM34 27h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM14 28h1v1h-1zM15 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM19 28h1v1h-1zM22 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM28 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h1v1h-1zM11 29h1v1h-1zM12 29h1v1h-1zM13 29h1v1h-1zM14 29h1v1h-1zM17 29h1v1h-1zM18 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM22 29h1v1h-1zM23 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM30 29h1v1h-1zM31 29h1v1h-1zM32 29h1v1h-1zM33 29h1v1h-1zM2 30h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h1v1h-1zM11 30h1v1h-1zM15 30h1v1h-1zM17 30h1v1h-1zM18 30h1v1h-1zM21 30h1v1h-1zM24 30h1v1h-1zM26 30h1v1h-1zM27 30h1v1h-1zM28 30h1v1h-1zM29 30h1v1h-1zM30 30h1v1h-1zM31 30h1v1h-1zM33 30h1v1h-1zM2 31h1v1h-1zM4 31h1v1h-1zM5 31h1v1h-1zM6 31h1v1h-1zM8 31h1v1h-1zM10 31h1v1h-1zM11 31h1v1h-1zM12 31h1v1h-1zM14 31h1v1h-1zM17 31h1v1h-1zM20 31h1v1h-1zM26 31h1v1h-1zM27 31h1v1h-1zM30 31h1v1h-1zM31 31h1v1h-1zM32 31h1v1h-1zM33 31h1v1h-1zM34 31h1v1h-1zM2 32h1v1h-1zM4 32h1v1h-1zM5 32h1v1h-1zM6 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM11 32h1v1h-1zM12 32h1v1h-1zM15 32h1v1h-1zM17 32h1v1h-1zM18 32h1v1h-1zM19 32h1v1h-1zM20 32h1v1h-1zM23 32h1v1h-1zM25 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM32 32h1v1h-1zM2 33h1v1h-1zM8 33h1v1h-1zM12 33h1v1h-1zM13 33h1v1h-1zM15 33h1v1h-1zM17 33h1v1h-1zM21 33h1v1h-1zM22 33h1v1h-1zM23 33h1v1h-1zM24 33h1v1h-1zM25 33h1v1h-1zM30 33h1v1h-1zM31 33h1v1h-1zM32 33h1v1h-1zM2 34h1v1h-1zM3 34h1v1h-1zM4 34h1v1h-1zM5 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM12 34h1v1h-1zM13 34h1v1h-1zM14 34h1v1h-1zM15 34h1v1h-1zM16 34h1v1h-1zM17 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM21 34h1v1h-1zM25 34h1v1h-1zM26 34h1v1h-1zM28 34h1v1h-1zM29 34h1v1h-1zM31 34h1v1h-1zM33 34h1v1h-1z" fill="#1B2A55"/></svg>`;
+function qrModal(){const L=document.getElementById('layer');
+  L.innerHTML=`<div class="overlay qrov" id="qov"><div class="qrbox" role="dialog" aria-modal="true" aria-labelledby="qh">
+    <div class="qrhead"><div class="orb"></div><div><small>AI 탐험 연구소</small><h3 id="qh">태블릿 카메라로 찍어서 입장해요!</h3></div></div>
+    <a class="qrlink" href="${LAB_URL}" target="_blank" rel="noopener" aria-label="연구소 링크 열기">${QR_SVG}</a>
+    <p class="qrurl" id="qurl">${LAB_URL}</p>
+    <div class="actions center"><a class="btn" href="${LAB_URL}" target="_blank" rel="noopener">링크 열기</a><button class="btn alt" id="qcopy">링크 복사</button><button class="btn alt" id="qclose">닫기</button></div>
+    <p class="lead" id="qmsg">QR을 누르거나 '링크 열기'를 눌러도 들어갈 수 있어요.</p></div></div>`;
+  const close=()=>{L.innerHTML='';};
+  document.getElementById('qclose').onclick=close;
+  document.getElementById('qov').onclick=e=>{if(e.target.id==='qov')close();};
+  document.getElementById('qcopy').onclick=()=>{const m=document.getElementById('qmsg');
+    const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('qurl'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);m.textContent='주소를 선택했어요. 복사해서 쓰세요.';};
+    try{navigator.clipboard.writeText(LAB_URL).then(()=>m.textContent='링크를 복사했어요.',fb);}catch(e){fb();}};
+  document.getElementById('qclose').focus();
+}
+document.getElementById('goQR').onclick=qrModal;
 renderRail(); render();
 })();
 </script>
 
-</html>
+</body></html>
